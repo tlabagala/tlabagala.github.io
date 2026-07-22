@@ -1,0 +1,86 @@
+[
+  {
+    "objectID": "projects/example-panel-analysis.html",
+    "href": "projects/example-panel-analysis.html",
+    "title": "Does station density move property crime?",
+    "section": "",
+    "text": "Does the density of police stations across local government areas (LGAs) predict property crime rates, once we account for everything about an area that does not change over time? This example uses simulated data to demonstrate the analysis structure; the real project would use the Victorian LGA crime panel."
+  },
+  {
+    "objectID": "projects/example-panel-analysis.html#the-question",
+    "href": "projects/example-panel-analysis.html#the-question",
+    "title": "Does station density move property crime?",
+    "section": "",
+    "text": "Does the density of police stations across local government areas (LGAs) predict property crime rates, once we account for everything about an area that does not change over time? This example uses simulated data to demonstrate the analysis structure; the real project would use the Victorian LGA crime panel."
+  },
+  {
+    "objectID": "projects/example-panel-analysis.html#data-and-cleaning",
+    "href": "projects/example-panel-analysis.html#data-and-cleaning",
+    "title": "Does station density move property crime?",
+    "section": "Data and cleaning",
+    "text": "Data and cleaning\nA balanced panel of 79 simulated LGAs observed annually from 2014 to 2023. In a real version the work is mostly in the cleaning: harmonising LGA names across sources, resolving a composite key of area by year, and dropping all-zero rows before the join. Here the data is generated below so the page is self-contained.\n\n\nCode\nlibrary(tidyverse)\nsource(here::here(\"theme/theme_portfolio.R\"))\n\nset.seed(42)\narea_types &lt;- c(\"Inner metro\", \"Outer metro\", \"Regional\", \"Rural\")\n\npanel &lt;- expand_grid(area = 1:79, year = 2014:2023) |&gt;\n  mutate(\n    type = area_types[1 + (area %% 4)],\n    station_density = rnorm(n(), 2, 0.5),\n    # true effect only in outer-metro areas\n    effect = if_else(type == \"Outer metro\", -0.9, -0.1),\n    crime_rate = 60 + effect * station_density +\n      rnorm(n(), 0, 3) + as.numeric(factor(area)) * 0.05\n  )"
+  },
+  {
+    "objectID": "projects/example-panel-analysis.html#method-and-why-this-one",
+    "href": "projects/example-panel-analysis.html#method-and-why-this-one",
+    "title": "Does station density move property crime?",
+    "section": "Method, and why this one",
+    "text": "Method, and why this one\nTwo-way fixed effects: area effects absorb anything constant within an LGA (baseline affluence, geography), and year effects absorb shocks common to all areas in a year (state-wide policy). The estimate then rests on within-area change over time, not on comparing one area to another.\nWhy this rather than pooled OLS? Pooled OLS would let stable differences between areas leak into the coefficient. Fixed effects is the standard defence against that time-invariant confounding.\n\nTwo-way fixed effects absorbs anything constant within an LGA, so the estimate rests on within-area change over time - not on comparing Melton to Melbourne.\n\n\n\nCode\nlibrary(fixest)\n\nm &lt;- feols(crime_rate ~ station_density | area + year, data = panel)\n\n# effect estimated separately by area type, for the figure\nby_type &lt;- panel |&gt;\n  group_split(type) |&gt;\n  map_dfr(\\(d) {\n    fit &lt;- feols(crime_rate ~ station_density | area + year, data = d)\n    tibble(type = unique(d$type),\n           estimate = coef(fit)[[\"station_density\"]],\n           se = se(fit)[[\"station_density\"]])\n  })\n\n\nThe pooled coefficient on station density is -0.44. Broken out by area type, the effect concentrates in outer-metro areas and is negligible elsewhere."
+  },
+  {
+    "objectID": "projects/example-panel-analysis.html#findings",
+    "href": "projects/example-panel-analysis.html#findings",
+    "title": "Does station density move property crime?",
+    "section": "Findings",
+    "text": "Findings\n\n\nCode\nby_type |&gt;\n  mutate(highlight = type == \"Outer metro\") |&gt;\n  ggplot(aes(x = fct_reorder(type, estimate), y = estimate, fill = highlight)) +\n  geom_col(width = 0.65) +\n  geom_errorbar(aes(ymin = estimate - 1.96 * se,\n                    ymax = estimate + 1.96 * se),\n                width = 0.15, colour = \"grey40\") +\n  scale_fill_highlight(guide = \"none\") +\n  coord_flip() +\n  labs(\n    title = \"Station density and property crime, by area type\",\n    subtitle = \"Estimated within-area effect with 95% intervals\",\n    x = NULL, y = \"Effect on crime rate\"\n  ) +\n  theme_portfolio()\n\n\nWarning in grid.Call(C_stringMetric, as.graphicsAnnot(x$label)): font family\nnot found in Windows font database\nWarning in grid.Call(C_stringMetric, as.graphicsAnnot(x$label)): font family\nnot found in Windows font database\nWarning in grid.Call(C_stringMetric, as.graphicsAnnot(x$label)): font family\nnot found in Windows font database\nWarning in grid.Call(C_stringMetric, as.graphicsAnnot(x$label)): font family\nnot found in Windows font database\n\n\nWarning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font\nfamily not found in Windows font database\nWarning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font\nfamily not found in Windows font database\nWarning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font\nfamily not found in Windows font database\n\n\nWarning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :\nfont family not found in Windows font database\nWarning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :\nfont family not found in Windows font database\nWarning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :\nfont family not found in Windows font database\nWarning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :\nfont family not found in Windows font database\n\n\n\n\n\n\n\n\nFigure 1: Fig 1. The association concentrates in outer-metro areas; other area types show no detectable effect. Synthetic data."
+  },
+  {
+    "objectID": "projects/example-panel-analysis.html#assumptions-and-limitations",
+    "href": "projects/example-panel-analysis.html#assumptions-and-limitations",
+    "title": "Does station density move property crime?",
+    "section": "Assumptions and limitations",
+    "text": "Assumptions and limitations\nThis design assumes that, after removing area and year effects, station density is not driven by an omitted time-varying factor. That assumption is doing a lot of work: if areas add stations in response to rising crime, the coefficient is biased regardless of the fixed effects. The standard errors here are classical; a real analysis would cluster by area to allow for serial correlation within an LGA. And because the data is simulated, none of these numbers say anything about the world - they only demonstrate the pipeline."
+  },
+  {
+    "objectID": "projects/example-panel-analysis.html#reproducing-this",
+    "href": "projects/example-panel-analysis.html#reproducing-this",
+    "title": "Does station density move property crime?",
+    "section": "Reproducing this",
+    "text": "Reproducing this\nThe page is self-contained: it generates its own data, so it renders with only tidyverse and fixest installed. A real write-up would link to the project repo and its renv.lock."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "I am a Business Analytics and Business Information Systems student at Monash, working in data analytics with a focus on turning messy operational data into decisions. My work sits across three languages: R for statistics and econometrics, Python for machine learning pipelines, and SQL for the data underneath both."
+  },
+  {
+    "objectID": "about.html#what-i-work-on",
+    "href": "about.html#what-i-work-on",
+    "title": "About",
+    "section": "What I work on",
+    "text": "What I work on\n\nPanel and mixed-effects econometrics applied to social-science questions\nMachine learning with careful validation design to prevent leakage\nReconciliation and variance analysis on financial and operational data\nAPI-driven data collection where the data does not arrive as a tidy CSV"
+  },
+  {
+    "objectID": "about.html#tools",
+    "href": "about.html#tools",
+    "title": "About",
+    "section": "Tools",
+    "text": "Tools\nR (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL · Excel · Quarto · Git"
+  },
+  {
+    "objectID": "about.html#elsewhere",
+    "href": "about.html#elsewhere",
+    "title": "About",
+    "section": "Elsewhere",
+    "text": "Elsewhere\n\nGitHub\nLinkedIn"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Tristan Labagala",
+    "section": "",
+    "text": "Analytics and research projects spanning econometrics, machine learning, and data engineering. Each write-up covers the question, the data, the method and why it was chosen, the findings, and - always - the assumptions it rests on. Every page links to its full code on GitHub.\n\n\n\n\n\n\n\n\nDoes station density move property crime?\n\n\n\nR\n\nfixest\n\npanel-econometrics\n\n\n\nA fixed-effects panel across simulated local government areas. Worked example.\n\n\n\nFeb 1, 2026\n\n\n\n\n\n\nNo matching items"
+  }
+]
