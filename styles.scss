@@ -1,10 +1,10 @@
 /*-- scss:defaults --*/
 
-// Fonts. Fraunces (serif) for display, Inter for body, JetBrains Mono for code.
-// Deliberately not the stock Bootswatch stack - the serif/sans pairing is what
-// makes the site read as a considered choice rather than a template default.
+// Fonts. Inter for both headings and body, JetBrains Mono for code. Headings
+// carry weight and size rather than a contrasting face. Fraunces is still
+// loaded for the pull-quote in scss:rules below, and nothing else.
 $font-family-sans-serif: "Inter", system-ui, -apple-system, sans-serif;
-$headings-font-family:   "Inter", Georgia, "Times New Roman", serif;
+$headings-font-family:   "Inter", system-ui, -apple-system, sans-serif;
 $font-family-monospace:  "JetBrains Mono", ui-monospace, monospace;
 
 // Colour. Warm off-white page, near-black ink, one blue accent. Blue rather than
