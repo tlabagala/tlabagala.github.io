@@ -19,17 +19,20 @@ $primary: #185fa5;
 
 /*-- scss:rules --*/
 
-// Narrow the reading measure so prose does not sprawl on wide monitors. This is
-// the single change that most makes long-form analysis pages feel finished.
+// Reading measure is set by grid.body-width in _quarto.yml, NOT here. Capping
+// main.content squeezes Quarto's whole layout grid, which shrinks .column-page
+// figures until they end up narrower than the text they are meant to break out
+// past. Leave this uncapped and tune the grid instead.
 main.content {
-  max-width: 34rem;
+  max-width: none;
 }
 
 // Break a figure out past the text column. Apply with a fenced div:
 // ::: {.column-page}
+// No cap, so a wide figure fills whatever the column-page grid track allows.
 .column-page .figure-wide,
 .figure-wide {
-  max-width: 52rem;
+  max-width: 100%;
   margin-inline: auto;
 }
 

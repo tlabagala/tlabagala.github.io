@@ -33,6 +33,11 @@ format:
     theme: [cosmo, styles.scss]
     toc: true
     toc-location: right
+    # Widen the body column past Quarto's 800px default. This is the outer
+    # constraint; styles.scss must not clip below it.
+    grid:
+      body-width: 900px
+      margin-width: 220px
     code-fold: true          # long chunks collapse by default
     code-tools: true
     # code-link needs the downlit package at render time. CI installs only
