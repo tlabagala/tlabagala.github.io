@@ -53,21 +53,21 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "I am a curious and eager final year Bachelor of Commerce/Bachelor of Information Systems student majoring in Business Analytics and Business Information Systems at Monash University. I am passionate about utilising data to uncover insights and solve real problems."
+    "text": "Hi there! My name is Tristan Labagala and I am final year Bachelor of Commerce (Business Analytics)/Bachelor of Information Systems (Business Information Technology) student at Monash University. I am passionate about utilising data to uncover insights and solve real problems."
   },
   {
     "objectID": "about.html#what-i-work-on",
     "href": "about.html#what-i-work-on",
     "title": "About",
     "section": "What I work on",
-    "text": "What I work on\n\nPanel and mixed-effects econometrics applied to social-science questions\nMachine learning with careful validation design to prevent leakage\nReconciliation and variance analysis on financial and operational data\nAPI-driven data collection where the data does not arrive as a tidy CSV"
+    "text": "What I work on"
   },
   {
     "objectID": "about.html#tools",
     "href": "about.html#tools",
     "title": "About",
     "section": "Tools",
-    "text": "Tools\nR (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL · Excel · Quarto · Git"
+    "text": "Tools\nR (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL · Excel · Quarto · Git · VS Code"
   },
   {
     "objectID": "about.html#elsewhere",
