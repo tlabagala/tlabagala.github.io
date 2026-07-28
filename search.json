@@ -72,8 +72,8 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Tristan Labagala",
+    "title": "My Portfolio",
     "section": "",
-    "text": "Analytics and research projects spanning econometrics, machine learning, and data engineering. Each write-up covers the question, the data, the method and why it was chosen, the findings, and - always - the assumptions it rests on. Every page links to its full code on GitHub.\n\n\n\n\n\n\n\n\n\n\nICU Mortality Probability Prediction\n\n\n\nR\n\ntidymodels\n\nLightGBM\n\nXGBoost\n\n\n\nFive model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, scored on a Kaggle leaderboard.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\nNo matching items"
+    "text": "This portfolio pulls together analytics and research work from university coursework, personal projects, and student club work. Every write-up follows the same structure - the question I was trying to answer, the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, and the assumptions the analysis rests on. Full code for every project is linked on GitHub, so you can see exactly how each result was produced.\n\n\n\n\n\n\n\n\n\n\nICU Mortality Probability Prediction\n\n\n\nR\n\ntidymodels\n\nLightGBM\n\nXGBoost\n\n\n\nFive model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, scored on a Kaggle leaderboard.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\nNo matching items"
   }
 ]
