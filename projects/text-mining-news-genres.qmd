@@ -81,29 +81,37 @@ Five of the six film articles rank among the most central documents - an artefac
 worth naming, since film reviews are the longest documents here and so carry more
 of the surviving high-frequency terms. Centrality is partly measuring length.
 
-The token network explains the 60% ceiling directly. After sparse-term removal the
-most central terms are `last`, `one`, `will`, `new` and `time` - generic
-journalistic filler that appears everywhere and discriminates nothing. Only the
-bipartite document-term view shows genre structure cleanly, with `govern` linking
-strongly to most political articles.
+The token network explains the 60% ceiling directly.
 
 ::: {.column-page}
-![Fig 3. In the bipartite view, govern and hous attach to the politics documents - the genre signal survives only when documents and terms are shown together.](../assets/figures/textmining-bipartite-network.png){.figure-wide}
+![Fig 3. The terms left after sparse-term removal are journalistic filler - last, one, will, new and time are the most central, and none of them carry genre.](../assets/figures/textmining-token-network.png){.figure-wide}
+:::
+
+Nothing there distinguishes a film review from an election report. The sparsity
+threshold kept the terms appearing everywhere, which is exactly the set that
+separates nothing - the clustering was working from vocabulary whose signal had
+already been filtered out.
+
+Only the bipartite view shows genre structure cleanly, because it keeps the
+document-term attachments instead of collapsing them into one projection.
+
+::: {.column-page}
+![Fig 4. In the bipartite view, govern and hous attach to the politics documents - the genre signal survives only when documents and terms are shown together.](../assets/figures/textmining-bipartite-network.png){.figure-wide}
 :::
 
 Sentiment analysis was a secondary check, and it found nothing. Across nine
-two-sided t-tests - overall sentiment, positivity and uncertainty, each compared
-between all three genre pairs - not one reached p < 0.05, before or after
-correction for multiple comparisons. Sport scores lowest on positive sentiment
-descriptively, but the gap is not distinguishable from noise at n = 20.
+two-sided t-tests - overall sentiment, positivity and uncertainty, each across all
+three genre pairs - not one reached p < 0.05, before or after correction. Sport
+scores lowest on positivity descriptively, but at n = 20 that gap is not
+distinguishable from noise.
 
-![Fig 4. Sport sits lowest on positive sentiment, but no pairwise difference between genres reaches significance.](../assets/figures/textmining-sentiment-boxplots.png)
+![Fig 5. Sport sits lowest on positive sentiment, but no pairwise difference between genres reaches significance.](../assets/figures/textmining-sentiment-boxplots.png)
 
-It is worth being precise about why, because the tempting version of this result
-is available. Test one-sided in the direction the boxplots already suggest and
-film beats sport on positivity at p = 0.037. That is a hypothesis chosen after
-seeing the data, it is the only one of nine comparisons that clears the line, and
-it does not survive Bonferroni correction. Two-sided is the honest test here.
+The tempting version of this result is available, which is worth being precise
+about. Test one-sided in the direction the boxplots already suggest and film beats
+sport on positivity at p = 0.037 - a hypothesis chosen after seeing the data, the
+only one of nine comparisons to clear the line, and it does not survive Bonferroni
+correction. Two-sided is the honest test here.
 
 ## Assumptions and limitations
 
