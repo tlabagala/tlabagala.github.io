@@ -91,12 +91,19 @@ strongly to most political articles.
 ![Fig 3. In the bipartite view, govern and hous attach to the politics documents - the genre signal survives only when documents and terms are shown together.](../assets/figures/textmining-bipartite-network.png){.figure-wide}
 :::
 
-Sentiment analysis was a secondary check. Across nine one-sided t-tests, only two
-reached significance: politics and film both score higher on positive sentiment
-than sport. Overall sentiment and uncertainty showed no significant differences
-between any pair of genres.
+Sentiment analysis was a secondary check, and it found nothing. Across nine
+two-sided t-tests - overall sentiment, positivity and uncertainty, each compared
+between all three genre pairs - not one reached p < 0.05, before or after
+correction for multiple comparisons. Sport scores lowest on positive sentiment
+descriptively, but the gap is not distinguishable from noise at n = 20.
 
-![Fig 4. Only positive sentiment separates the genres, and only for sport against the other two.](../assets/figures/textmining-sentiment-boxplots.png)
+![Fig 4. Sport sits lowest on positive sentiment, but no pairwise difference between genres reaches significance.](../assets/figures/textmining-sentiment-boxplots.png)
+
+It is worth being precise about why, because the tempting version of this result
+is available. Test one-sided in the direction the boxplots already suggest and
+film beats sport on positivity at p = 0.037. That is a hypothesis chosen after
+seeing the data, it is the only one of nine comparisons that clears the line, and
+it does not survive Bonferroni correction. Two-sided is the honest test here.
 
 ## Assumptions and limitations
 
@@ -104,8 +111,9 @@ The honest summary is that this shows the method working, not a result worth
 trusting.
 
 - **n = 20 is far too small.** With 6 to 7 documents per genre the t-tests have
-  almost no power. I did not correct for multiple comparisons across the nine
-  tests, and under a Bonferroni adjustment neither significant result survives.
+  almost no power, which is the most likely reason none of them detect anything.
+  A null result at this sample size is not evidence that the genres have similar
+  sentiment - it is mostly evidence that the design cannot tell.
 - **The corpus is not a random sample.** I chose the articles myself, so my own
   sense of a typical sport or film piece is baked into both sample and labels.
 - **Genre labels are my own judgement.** Misclassifications concentrate in
