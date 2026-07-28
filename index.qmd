@@ -1,6 +1,5 @@
 ---
-title: "Tristan Labagala"
-subtitle: "Data analytics and research, in R, Python, and SQL."
+title: "My Portfolio"
 listing:
   id: work
   contents: projects
@@ -11,14 +10,13 @@ listing:
   filter-ui: false
   fields: [image, title, description, categories, date]
 page-layout: full
-title-block-banner: "#185fa5" 
-title-block-banner-color: white
 ---
 
-Analytics and research projects spanning econometrics, machine learning, and
-data engineering. Each write-up covers the question, the data, the method and
-why it was chosen, the findings, and - always - the assumptions it rests on.
-Every page links to its full code on GitHub.
+This portfolio pulls together analytics and research work from university coursework, personal projects,
+and student club work. Every write-up follows the same structure - the question I was trying to answer, 
+the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, 
+and the assumptions the analysis rests on. Full code for every project is linked on GitHub, so you can see 
+exactly how each result was produced.
 
 ::: {#work}
 :::
