@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://tlabagala.github.io/projects/icu-mortality-prediction_1.html</loc>
-    <lastmod>2026-07-28T03:11:14.379Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tlabagala.github.io/about.html</loc>
-    <lastmod>2026-07-28T03:11:14.378Z</lastmod>
+    <loc>https://tlabagala.github.io/projects/text-mining-news-genres.html</loc>
+    <lastmod>2026-07-28T03:44:27.029Z</lastmod>
   </url>
   <url>
     <loc>https://tlabagala.github.io/index.html</loc>
-    <lastmod>2026-07-28T03:11:14.378Z</lastmod>
+    <lastmod>2026-07-28T03:44:27.027Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tlabagala.github.io/about.html</loc>
+    <lastmod>2026-07-28T03:44:27.021Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tlabagala.github.io/projects/icu-mortality-prediction_1.html</loc>
+    <lastmod>2026-07-28T03:44:27.029Z</lastmod>
   </url>
 </urlset>

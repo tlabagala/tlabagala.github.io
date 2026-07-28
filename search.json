@@ -1,5 +1,89 @@
 [
   {
+    "objectID": "projects/text-mining-news-genres.html",
+    "href": "projects/text-mining-news-genres.html",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "",
+    "text": "Given only the words a news article uses - no author, no section, no tags - can you work out what kind of article it is? I built a corpus of 20 articles across three genres (sport, film, politics) and tested whether unsupervised methods could recover those genre labels from term frequencies alone. The labels were held back and used only to score the result."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#the-question",
+    "href": "projects/text-mining-news-genres.html#the-question",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "",
+    "text": "Given only the words a news article uses - no author, no section, no tags - can you work out what kind of article it is? I built a corpus of 20 articles across three genres (sport, film, politics) and tested whether unsupervised methods could recover those genre labels from term frequencies alone. The labels were held back and used only to score the result."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#data-and-cleaning",
+    "href": "projects/text-mining-news-genres.html#data-and-cleaning",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "Data and cleaning",
+    "text": "Data and cleaning\nThe corpus is 20 news articles published between November 2024 and June 2025, drawn from the BBC, the Guardian, ABC News, news.com.au, ESPN, Variety, Time Out and The Conversation. Each was saved as a plain text file named for its subject, giving a roughly even split: 7 sport, 6 film, 7 politics.\nPreprocessing followed the standard tm pipeline - strip numbers and punctuation, lowercase, drop English stopwords, collapse whitespace, then stem with Snowball. Three tokens survived and had to be removed by hand: the en dash, the opening curly quote, and the possessive 's. All three are non-ASCII, so removePunctuation never touched them - a reminder that a textbook pipeline will not match real scraped text without inspection.\nThe document term matrix was then trimmed with removeSparseTerms(sparse = 0.7), leaving 20 documents by 28 terms. That threshold is aggressive: it keeps only terms appearing in at least 30% of documents, which makes the matrix small enough to visualise but also, as it turns out, strips most of the genre-specific vocabulary.\nView the code on GitHub"
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#method-and-why-this-one",
+    "href": "projects/text-mining-news-genres.html#method-and-why-this-one",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "Method, and why this one",
+    "text": "Method, and why this one\nHierarchical clustering on cosine distance, with Ward linkage. Cosine rather than Euclidean because these documents differ substantially in length - the film reviews run to nearly 500 words while several sport pieces are under 150. On raw counts, Euclidean distance would read that length gap as topical difference and cluster long documents with long documents. Cosine normalises it away by comparing direction rather than magnitude.\nI then cut the tree at k=3 to match the three known genres, and separately built two co-occurrence networks from the binary document-term matrix: one linking documents that share terms, one linking terms that share documents. Eigenvector centrality on each identified the structurally important nodes.\n\nClustering gave a single hard label per document. The network showed that several documents genuinely sit between genres - which is the more honest description of what modern journalism looks like."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#findings",
+    "href": "projects/text-mining-news-genres.html#findings",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "Findings",
+    "text": "Findings\nClustering recovered the genre labels for 12 of 20 documents, or 60% accuracy against a 33% baseline. Better than chance, but a long way from reliable.\n\n\n\n\nFig 1. Cut at three clusters, the dendrogram recovers 12 of 20 labels - sport concentrates in one branch, while film and politics each split across two.\n\n\n\nThe errors are informative rather than random. The Brisbane Olympics article is labelled sport but landed in politics - it is largely about Queensland government funding. The Sydney FC piece is a sports story about a chairman appointment, and shares governance vocabulary with political reporting. Three political articles landed in the film cluster, all beside action films whose reviews borrow the language of conflict.\nThe document network makes the overlap visible in a way the dendrogram cannot.\n\n\n\n\nFig 2. Film articles occupy the centre of the document network - Mountainhead scores 1.00 on eigenvector centrality, Brexit_Weakening_Nature_Laws 0.96, Mission_Impossible 0.86.\n\n\n\nFive of the six film articles rank among the most central documents - an artefact worth naming, since film reviews are the longest documents here and so carry more of the surviving high-frequency terms. Centrality is partly measuring length.\nThe token network explains the 60% ceiling directly. After sparse-term removal the most central terms are last, one, will, new and time - generic journalistic filler that appears everywhere and discriminates nothing. Only the bipartite document-term view shows genre structure cleanly, with govern linking strongly to most political articles.\n\n\n\n\nFig 3. In the bipartite view, govern and hous attach to the politics documents - the genre signal survives only when documents and terms are shown together.\n\n\n\nSentiment analysis was a secondary check. Across nine one-sided t-tests, only two reached significance: politics and film both score higher on positive sentiment than sport. Overall sentiment and uncertainty showed no significant differences between any pair of genres.\n\n\n\nFig 4. Only positive sentiment separates the genres, and only for sport against the other two."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#assumptions-and-limitations",
+    "href": "projects/text-mining-news-genres.html#assumptions-and-limitations",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "Assumptions and limitations",
+    "text": "Assumptions and limitations\nThe honest summary is that this shows the method working, not a result worth trusting.\n\nn = 20 is far too small. With 6 to 7 documents per genre the t-tests have almost no power. I did not correct for multiple comparisons across the nine tests, and under a Bonferroni adjustment neither significant result survives.\nThe corpus is not a random sample. I chose the articles myself, so my own sense of a typical sport or film piece is baked into both sample and labels.\nGenre labels are my own judgement. Misclassifications concentrate in documents that genuinely span topics, so part of the 40% error is disagreement about the label rather than failure of the clustering.\nk=3 was imposed, not discovered. I cut the tree at the number of genres I already knew, and did not check whether the dendrogram supports three clusters.\nCentrality is confounded with document length, which I did not normalise for. That film articles are central is partly a finding that they are long.\nsparse = 0.7 was tuned for legible networks, not for accuracy. It removed the genre-specific vocabulary the task needed, and is the most likely cause of the 60% ceiling. I did not test other thresholds.\nStemming is lossy and was not validated. Snowball produces hous, includ, govern; I did not check what it merged.\n\nWhat this does not license: any claim about news genres in general, or that 60% is the achievable accuracy here. A larger corpus with a tuned sparsity threshold would almost certainly do better."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#reproducing-this",
+    "href": "projects/text-mining-news-genres.html#reproducing-this",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "Reproducing this",
+    "text": "Reproducing this\nWritten in R with tm, SnowballC, SentimentAnalysis, proxy and igraph, as four sequential scripts in the code repo.\nThe corpus is 20 copyrighted news articles and is not redistributed, but the derived document-term matrix is - so the clustering and all three network figures reproduce from the repo alone, with no corpus needed. SOURCES.md lists every article URL if you want to rebuild it and re-run the sentiment step. The layout seed is fixed, so the network figures come out identical."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "My Portfolio",
+    "section": "",
+    "text": "This portfolio pulls together analytics and research work from university coursework, personal projects, and student club work. Every write-up follows the same structure - the question I was trying to answer, the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, and the assumptions the analysis rests on. Full code for every project is linked on GitHub, so you can see exactly how each result was produced.\n\n\n\n\n\n\n\n\n\n\nICU Mortality Probability Prediction\n\n\n\nR\n\ntidymodels\n\nLightGBM\n\nXGBoost\n\n\n\nFive model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, scored on a Kaggle leaderboard.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan word frequencies alone tell sport from politics?\n\n\n\nR\n\ntm\n\nigraph\n\ntext-mining\n\nclustering\n\n\n\nClustering and network analysis on a hand-built corpus of 20 news articles, in R with tm and igraph.\n\n\n\nMay 29, 2025\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "Hi there! My name is Tristan Labagala and I am final year Bachelor of Commerce (Business Analytics)/Bachelor of Information Systems (Business Information Technology) student at Monash University. I am passionate about utilising data to uncover insights and solve real problems."
+  },
+  {
+    "objectID": "about.html#what-i-work-on",
+    "href": "about.html#what-i-work-on",
+    "title": "About",
+    "section": "What I work on",
+    "text": "What I work on"
+  },
+  {
+    "objectID": "about.html#tools",
+    "href": "about.html#tools",
+    "title": "About",
+    "section": "Tools",
+    "text": "Tools\nR (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL · Excel · Quarto · Git · VS Code"
+  },
+  {
+    "objectID": "about.html#elsewhere",
+    "href": "about.html#elsewhere",
+    "title": "About",
+    "section": "Elsewhere",
+    "text": "Elsewhere\n\nGitHub\nLinkedIn"
+  },
+  {
     "objectID": "projects/icu-mortality-prediction_1.html",
     "href": "projects/icu-mortality-prediction_1.html",
     "title": "ICU Mortality Probability Prediction",
@@ -40,40 +124,5 @@
     "title": "ICU Mortality Probability Prediction",
     "section": "Assumptions and limitations",
     "text": "Assumptions and limitations\nFolds were stratified on the outcome, not grouped by patient. Splitting happened at ICU-stay level. If a patient contributes more than one stay, their rows can land in different folds and the model can effectively memorise them, inflating the out-of-fold estimate. Patient-level splitting via group_vfold_cv() is the fix. I have not quantified how much repeat admission exists in this extract, so I do not know the size of the effect.\nDiagnosis codes are not available at hour zero. ICD-9 codes are assigned over the stay and finalised at discharge, so using them to predict that stay’s outcome is defensible as a retrospective benchmark but would not transfer to real-time use.\nLogistic regression assumes independent observations and linearity in the log-odds. The first is questionable for the same repeat-admission reason; the second was not formally checked.\nThe probabilities are ranked, not calibrated. Rebalancing the positive class distorts the output scale and averaging fifteen models compresses it toward the middle. PR-AUC was computed alongside ROC-AUC, which is the right instinct at an 11% base rate, but no calibration plot was produced.\nNone of this licenses a claim that any feature causes mortality, or that acting on the model would change an outcome. It supports one claim only: the ranking is informative."
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "Hi there! My name is Tristan Labagala and I am final year Bachelor of Commerce (Business Analytics)/Bachelor of Information Systems (Business Information Technology) student at Monash University. I am passionate about utilising data to uncover insights and solve real problems."
-  },
-  {
-    "objectID": "about.html#what-i-work-on",
-    "href": "about.html#what-i-work-on",
-    "title": "About",
-    "section": "What I work on",
-    "text": "What I work on"
-  },
-  {
-    "objectID": "about.html#tools",
-    "href": "about.html#tools",
-    "title": "About",
-    "section": "Tools",
-    "text": "Tools\nR (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL · Excel · Quarto · Git · VS Code"
-  },
-  {
-    "objectID": "about.html#elsewhere",
-    "href": "about.html#elsewhere",
-    "title": "About",
-    "section": "Elsewhere",
-    "text": "Elsewhere\n\nGitHub\nLinkedIn"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "My Portfolio",
-    "section": "",
-    "text": "This portfolio pulls together analytics and research work from university coursework, personal projects, and student club work. Every write-up follows the same structure - the question I was trying to answer, the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, and the assumptions the analysis rests on. Full code for every project is linked on GitHub, so you can see exactly how each result was produced.\n\n\n\n\n\n\n\n\n\n\nICU Mortality Probability Prediction\n\n\n\nR\n\ntidymodels\n\nLightGBM\n\nXGBoost\n\n\n\nFive model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, scored on a Kaggle leaderboard.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\nNo matching items"
   }
 ]
