@@ -7,6 +7,13 @@ image: "../assets/figures/textmining-document-network.png"
 image-alt: "Network of 20 news documents, coloured by genre, with film articles sitting at the centre."
 ---
 
+::: {.project-summary}
+- **Problem:** Can unsupervised methods work out whether a news article is about sport, film or politics from its word frequencies alone?
+- **Approach:** Hierarchical clustering on cosine distance, plus document and term co-occurrence networks, on a hand-built corpus of 20 articles.
+- **Result:** 12 of 20 genre labels recovered (60%, against a 33% chance baseline). The main cause of errors was a preprocessing setting, not the clustering.
+- **Skills:** R, tm, igraph, text preprocessing, clustering, network analysis, hypothesis testing.
+:::
+
 ## The question
 
 Given only the words a news article uses - no author, no section, no tags - can
@@ -112,6 +119,17 @@ about. Test one-sided in the direction the boxplots already suggest and film bea
 sport on positivity at p = 0.037 - a hypothesis chosen after seeing the data, the
 only one of nine comparisons to clear the line, and it does not survive Bonferroni
 correction. Two-sided is the honest test here.
+
+## What this means in practice
+
+The same pipeline is how you would start on unlabelled text in a business -
+customer feedback, support tickets, open-ended survey answers - to find themes
+before anyone has tagged them. The lesson that transfers is the sparsity threshold:
+the setting that made the networks readable also removed the vocabulary that
+mattered, so in practice I would tune it against a small hand-labelled sample
+before trusting the clusters. And documents that sit between groups are a finding,
+not an error - a ticket that is both a billing question and a complaint belongs in
+both queues, which a single hard cluster label cannot express.
 
 ## Assumptions and limitations
 

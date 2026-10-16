@@ -1,10 +1,10 @@
 /*-- scss:defaults --*/
 
-// Fonts. Fraunces (serif) for display, Inter for body, JetBrains Mono for code.
-// Deliberately not the stock Bootswatch stack - the serif/sans pairing is what
-// makes the site read as a considered choice rather than a template default.
+// Fonts. Inter for headings and body, JetBrains Mono for code. With one typeface,
+// weight and size carry the hierarchy. Fallbacks stay sans-serif so a failed font
+// load does not flip headings to a different style of typeface.
 $font-family-sans-serif: "Inter", system-ui, -apple-system, sans-serif;
-$headings-font-family:   "Inter", Georgia, "Times New Roman", serif;
+$headings-font-family:   "Inter", system-ui, -apple-system, sans-serif;
 $font-family-monospace:  "JetBrains Mono", ui-monospace, monospace;
 
 // Colour. Warm off-white page, near-black ink, one blue accent. Blue rather than
@@ -85,9 +85,32 @@ blockquote {
   border-left: 2px solid #185fa5;
   border-radius: 0;
   padding-left: 1rem;
-  font-family: "Inter", Georgia, serif;
+  font-family: $font-family-sans-serif;
   font-style: normal;
   color: #24211f;
+}
+
+// Summary box at the top of each project page: the four lines a skimming reader
+// takes away. A light tint and the accent rule set it apart from the prose.
+.project-summary {
+  background: #f3f6fa;
+  border-left: 3px solid $primary;
+  border-radius: 0 8px 8px 0;
+  padding: 0.9rem 1.2rem;
+  margin: 0.5rem 0 2rem;
+
+  ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+  li {
+    margin: 0.3rem 0;
+    line-height: 1.5;
+  }
+  li strong {
+    color: $primary;
+  }
 }
 
 // Headshot on the About page. Circular and cropped square regardless of the

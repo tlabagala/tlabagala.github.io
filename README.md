@@ -145,8 +145,8 @@ usually fail accessibility.
 
 ### Fonts
 
-Three families are declared in `scss:defaults` and loaded from Google Fonts via
-the `include-in-header` block in `_quarto.yml`. Both places have to agree: if you
+Two families, Inter and JetBrains Mono, are declared in `scss:defaults` and
+loaded from Google Fonts via the `include-in-header` block in `_quarto.yml`. Both places have to agree: if you
 add a family to the SCSS without adding it to the font URL, it silently falls
 back.
 
@@ -166,15 +166,19 @@ headings and body, weight and size are what create hierarchy.
 
 ### Layout and reading measure
 
-```scss
-main.content {
-  max-width: 34rem;
-}
+The width of the prose column is set by the grid in `_quarto.yml`, not in
+`styles.scss`:
+
+```yaml
+grid:
+  body-width: 900px
+  margin-width: 220px
 ```
 
-This is the narrow prose column, and it is the single biggest reason the pages
-feel finished rather than sprawling. Raise it if lines feel cramped, but going
-much past `40rem` starts to hurt readability.
+Keep it there. Capping `main.content` in `styles.scss` instead squeezes Quarto's
+whole layout grid, so `.column-page` figures end up narrower than the text they
+are meant to break out past. That is why `styles.scss` sets
+`main.content { max-width: none; }`.
 
 To let one figure break out past that column, wrap it in a fenced div in the
 `.qmd`:
@@ -184,6 +188,20 @@ To let one figure break out past that column, wrap it in a fenced div in the
 ![Caption stating the finding](../assets/figures/name.png)
 :::
 ```
+
+### Project summary box
+
+Each project page opens with a `.project-summary` fenced div: four one-line
+bullets (Problem, Approach, Result, Skills) for a reader who stops there. Its
+styling is the `.project-summary` block in `scss:rules`, and the template has a
+skeleton to copy.
+
+### Link previews and favicon
+
+`open-graph` and `twitter-card` in `_quarto.yml` give each page a preview card
+when its link is shared on LinkedIn or Slack. A project page uses its own
+`image:`, and every other page falls back to the headshot. The browser-tab icon
+is `assets/favicon.png`.
 
 ### Listing cards and title blocks
 

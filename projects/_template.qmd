@@ -15,12 +15,21 @@ Rules:
 - Title is a plain-English question, not a method name.
 - categories become the filter pills and per-card badges: use real tool names.
 - Keep the body roughly 600-900 words.
-- Follow the section order below. The "Assumptions and limitations" section is
-  required, not optional.
+- Follow the section order below. The summary box and the "Assumptions and
+  limitations" section are required, not optional.
+- The summary box is for a reader who stops there: one line each, with the
+  headline number in Result.
 - Captions state the finding, not the chart type.
 - Use hyphens, never em dashes.
 - One language per page (knitr for R, jupyter for Python). Do not mix.
 -->
+
+::: {.project-summary}
+- **Problem:** The question, in one plain-English line.
+- **Approach:** The method and data, in one line.
+- **Result:** The headline number, against its baseline.
+- **Skills:** The tools and techniques the project demonstrates.
+:::
 
 ## The question
 
@@ -52,6 +61,12 @@ Display one or two figures. Preferred pattern is a pre-exported PNG:
 :::
 
 State the headline numbers in the prose around the figure.
+
+## What this means in practice
+
+One short paragraph linking the result to a decision someone would make: who
+would act on it, what it would change, and what would have to be true first. For
+coursework or hobby projects, name the business problem the same method solves.
 
 ## Assumptions and limitations
 

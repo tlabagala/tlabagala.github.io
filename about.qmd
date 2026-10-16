@@ -4,7 +4,7 @@ title: "About"
 
 ![](assets/headshot.jpg){.headshot fig-alt="Tristan Labagala"}
 
-Hi there! My name is Tristan Labagala and I am final year Bachelor of Commerce (Business Analytics)/Bachelor of Information Systems (Business Information Technology) student at Monash University. I am passionate about utilising data to uncover insights and solve real problems.
+Hi there! My name is Tristan Labagala and I am a final year Bachelor of Commerce (Business Analytics)/Bachelor of Information Systems (Business Information Technology) student at Monash University. I am passionate about utilising data to uncover insights and solve real problems.
 
 ## Tools
 

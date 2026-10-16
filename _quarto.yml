@@ -12,6 +12,12 @@ website:
   title: "Tristan Labagala"
   description: "Data analytics and research projects in R, Python, and SQL."
   site-url: "https://tlabagala.github.io"
+  favicon: assets/favicon.png
+  # Link previews when a page is shared on LinkedIn, Slack or similar. Project
+  # pages use their own image: field; the headshot is the fallback.
+  image: assets/headshot.jpg
+  open-graph: true
+  twitter-card: true
   navbar:
     pinned: true
     background: primary   # picks up $primary from styles.scss
@@ -49,4 +55,4 @@ format:
       - text: |
           <link rel="preconnect" href="https://fonts.googleapis.com">
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-          <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500&family=JetBrains+Mono&display=swap" rel="stylesheet">
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
