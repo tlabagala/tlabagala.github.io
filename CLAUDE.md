@@ -49,8 +49,9 @@ Do not run `quarto publish` locally. Publishing happens automatically on push to
 ├── projects/
 │   ├── _metadata.yml       # settings applied to every project page
 │   ├── _template.qmd       # copy-me skeleton (ignored by Quarto, leading _)
-│   └── example-panel-analysis.qmd   # worked example, renders standalone
+│   └── <slug>.qmd          # one page per project
 ├── assets/figures/         # PNGs exported from project repos
+├── assets/favicon.png      # browser-tab icon
 ├── _freeze/                # cached executed output - COMMITTED, do not gitignore
 └── .github/workflows/publish.yml
 ```
@@ -96,7 +97,7 @@ Two acceptable patterns for a page's figures:
    `![caption](../assets/figures/name.png)`. The page needs no packages and
    renders instantly.
 2. Live: the page generates the figure in an R or Python chunk. Use this only
-   for small, self-contained demos (the example project does this).
+   for small, self-contained demos.
 
 For any R figure, source the shared theme and apply it:
 
@@ -117,8 +118,8 @@ charts look designed rather than default.
    The `categories` become the filter pills and the per-card tool badges, so use
    real tool names (e.g. `[R, fixest, panel-econometrics]`).
 3. Point `image:` at a thumbnail in `assets/figures/`.
-4. Write the body in the fixed section order (see the template). Keep it to
-   roughly 600-900 words.
+4. Fill the summary box, then write the body in the fixed section order (see
+   the template). Keep the body to roughly 600-900 words.
 5. `quarto preview` to check it.
 6. Render it so `_freeze/` updates: `quarto render projects/<slug>.qmd`.
 7. Commit the `.qmd`, any new figures, AND `_freeze/`. Push to `main`.
@@ -130,12 +131,17 @@ automatically from the new page's YAML header.
 
 - Prose uses hyphens, never em dashes.
 - Titles and section headings in sentence case.
-- Each project page ends with an explicit "Assumptions and limitations" section.
-  This is a hard requirement, not optional - it is the main differentiator.
+- Each project page opens with a `.project-summary` box (Problem, Approach,
+  Result, Skills) and has a "What this means in practice" section linking the
+  result to a decision.
+- Each project page has an explicit "Assumptions and limitations" section near
+  the end. This is a hard requirement, not optional - it is the main
+  differentiator.
 - Figure captions state the finding, not the chart type. "Cost per tonne
   diverged from budget from Q3, driven by rate not volume", not "Cost over time".
-- Keep the body text column narrow (set in `styles.scss`); let key figures break
-  out wider using a `::: {.column-page}` fenced div.
+- Keep the body text column narrow (set by `grid` in `_quarto.yml`, not in
+  `styles.scss`); let key figures break out wider using a `::: {.column-page}`
+  fenced div.
 
 ## Employer-data caution
 
