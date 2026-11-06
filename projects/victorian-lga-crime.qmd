@@ -1,0 +1,79 @@
+---
+title: "What predicts crime across Victoria's local councils?"
+description: "Panel econometrics on 78 Victorian LGAs, 2011-2024: fixed effects, LASSO and elastic net, as part of a three-person MSAC research team."
+date: 2026-05-01
+categories: [R, panel-econometrics, fixed-effects, elastic-net, choropleth]
+image: "../assets/figures/lga-crime-choropleth.png"
+image-alt: "Map of Victoria shaded by average crime rate per 100,000 for each local government area, 2011 to 2024."
+resources:
+  - "../assets/papers/victorian-lga-crime-msac-2026.pdf"
+---
+
+## The question
+
+Which demographic and economic factors explain the differences in crime rates
+across Victoria's 78 local government areas (LGAs) between 2011 and 2024? This
+was a student research project for the Monash Statistical Analytics Club
+(MSAC), written with Sanjana Bhavin Lakhpatwala and Sayali Choudhary.
+
+## Data and cleaning
+
+The panel covers 78 LGAs over 14 years (1,092 LGA-years). It joins Crime
+Statistics Agency Victoria offence data to ABS census data and other public
+indicators. Census variables only exist for 2011, 2016 and 2021, so each value
+was carried forward to the following years. A census-years-only regression gave
+the same signs and significance, which supports the fill. Unemployment is
+published by region, so each LGA was given its region's rate.
+
+## Method, and why this one
+
+The models build on each other: pooled OLS as a baseline, then LGA, time and
+combined fixed effects, then factor analysis, LASSO and elastic net to deal with
+strongly correlated predictors. The time fixed effects model removes shocks
+that hit every LGA in the same year. The combined model also removes anything
+constant about each LGA, so what remains is change within an LGA over time.
+
+> A variable can point one way when you compare LGAs with each other and the
+> opposite way when you follow one LGA over time.
+
+## Findings
+
+Fertility rate and education go with lower crime, and unemployment and
+population density with higher crime. Citizenship mix is significant across
+models, likely reflecting wider demographic and urban patterns rather than a
+direct effect.
+
+Bachelor's degree share shows why fixed effects matter. It is positive in the
+time fixed effects model, since inner Melbourne is both highly educated and
+high crime, but strongly negative within LGAs in the combined model (-245.5,
+p < 0.001).
+
+![Fig 1. Income, unemployment and certificate share are only significant for offence counts, which means their effect is mostly about population size.](../assets/figures/lga-crime-count-vs-rate.png)
+
+Elastic net gave the best out-of-sample accuracy and was selected for
+prediction. The fixed effects models remain the better tool for explaining
+change within an LGA.
+
+## The full paper
+
+<iframe src="../assets/papers/victorian-lga-crime-msac-2026.pdf" width="100%" height="800" style="border: 1px solid #ddd;" title="Exploring predictors of crime rates across Victorian LGAs from 2011-2024"></iframe>
+
+[Download the paper (PDF)](../assets/papers/victorian-lga-crime-msac-2026.pdf)
+
+## Assumptions and limitations
+
+As set out in the paper:
+
+- Education and citizenship are census-only and were carried forward, which
+  assumes they change gradually.
+- Unemployment is assigned at regional rather than LGA level, which may add
+  measurement error.
+- Models use different outcomes (crime rate vs offence count) and
+  transformations, so RMSE and MAE are not directly comparable and model
+  selection leans on MAPE.
+- Fixed effects cannot account for time-varying omitted variables such as
+  policing intensity, policy changes or social programs.
+- LASSO and elastic net coefficients are biased by shrinkage and should be
+  read as predictive, not causal.
+- Results are area-level associations, so applying them to individuals risks
+  the ecological fallacy.
