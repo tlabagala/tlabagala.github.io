@@ -1,5 +1,5 @@
 ---
-title: "What predicts crime across Victoria's local councils?"
+title: "What predicts crime across Victoria's LGAs?"
 description: "Panel econometrics on 78 Victorian LGAs, 2011-2024: fixed effects, LASSO and elastic net, as part of a three-person MSAC research team."
 date: 2026-05-01
 categories: [R, panel-econometrics, fixed-effects, elastic-net, choropleth]
@@ -8,6 +8,13 @@ image-alt: "Map of Victoria shaded by average crime rate per 100,000 for each lo
 resources:
   - "../assets/papers/victorian-lga-crime-msac-2026.pdf"
 ---
+
+::: {.project-summary}
+- **Problem:** Find which demographic and economic factors explain differences in crime rates across Victoria's 78 LGAs.
+- **Approach:** A 2011-2024 panel of 1,092 LGA-years, modelled with pooled OLS, fixed effects, factor analysis, LASSO and elastic net.
+- **Result:** Fertility and education go with lower crime, and unemployment and density with higher; elastic net predicted best (test R² 0.777).
+- **Skills:** R, panel econometrics, fixed effects, regularisation, choropleth mapping, data integration.
+:::
 
 ## The question
 
@@ -53,6 +60,15 @@ p < 0.001).
 Elastic net gave the best out-of-sample accuracy and was selected for
 prediction. The fixed effects models remain the better tool for explaining
 change within an LGA.
+
+## What this means in practice
+
+The paper's conclusion points policy toward education, employment and
+community stability as levers for reducing crime locally. The wider lesson carries over to any
+regional data: a pattern across areas, like educated councils having more
+crime, can reverse within each area over time. Before acting on a cross-area
+comparison, check whether the effect holds once each area is compared with
+itself.
 
 ## The full paper
 
