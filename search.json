@@ -2,49 +2,56 @@
   {
     "objectID": "projects/victorian-lga-crime.html",
     "href": "projects/victorian-lga-crime.html",
-    "title": "What predicts crime across Victoria’s local councils?",
+    "title": "What predicts crime across Victoria’s LGAs?",
     "section": "",
-    "text": "Which demographic and economic factors explain the differences in crime rates across Victoria’s 78 local government areas (LGAs) between 2011 and 2024? This was a student research project for the Monash Statistical Analytics Club (MSAC), written with Sanjana Bhavin Lakhpatwala and Sayali Choudhary."
+    "text": "Problem: Find which demographic and economic factors explain differences in crime rates across Victoria’s 78 LGAs.\nApproach: A 2011-2024 panel of 1,092 LGA-years, modelled with pooled OLS, fixed effects, factor analysis, LASSO and elastic net.\nResult: Fertility and education go with lower crime, and unemployment and density with higher; elastic net predicted best (test R² 0.777).\nSkills: R, panel econometrics, fixed effects, regularisation, choropleth mapping, data integration."
   },
   {
     "objectID": "projects/victorian-lga-crime.html#the-question",
     "href": "projects/victorian-lga-crime.html#the-question",
-    "title": "What predicts crime across Victoria’s local councils?",
-    "section": "",
-    "text": "Which demographic and economic factors explain the differences in crime rates across Victoria’s 78 local government areas (LGAs) between 2011 and 2024? This was a student research project for the Monash Statistical Analytics Club (MSAC), written with Sanjana Bhavin Lakhpatwala and Sayali Choudhary."
+    "title": "What predicts crime across Victoria’s LGAs?",
+    "section": "The question",
+    "text": "The question\nWhich demographic and economic factors explain the differences in crime rates across Victoria’s 78 local government areas (LGAs) between 2011 and 2024? This was a student research project for the Monash Statistical Analytics Club (MSAC), written with Sanjana Bhavin Lakhpatwala and Sayali Choudhary."
   },
   {
     "objectID": "projects/victorian-lga-crime.html#data-and-cleaning",
     "href": "projects/victorian-lga-crime.html#data-and-cleaning",
-    "title": "What predicts crime across Victoria’s local councils?",
+    "title": "What predicts crime across Victoria’s LGAs?",
     "section": "Data and cleaning",
     "text": "Data and cleaning\nThe panel covers 78 LGAs over 14 years (1,092 LGA-years). It joins Crime Statistics Agency Victoria offence data to ABS census data and other public indicators. Census variables only exist for 2011, 2016 and 2021, so each value was carried forward to the following years. A census-years-only regression gave the same signs and significance, which supports the fill. Unemployment is published by region, so each LGA was given its region’s rate."
   },
   {
     "objectID": "projects/victorian-lga-crime.html#method-and-why-this-one",
     "href": "projects/victorian-lga-crime.html#method-and-why-this-one",
-    "title": "What predicts crime across Victoria’s local councils?",
+    "title": "What predicts crime across Victoria’s LGAs?",
     "section": "Method, and why this one",
     "text": "Method, and why this one\nThe models build on each other: pooled OLS as a baseline, then LGA, time and combined fixed effects, then factor analysis, LASSO and elastic net to deal with strongly correlated predictors. The time fixed effects model removes shocks that hit every LGA in the same year. The combined model also removes anything constant about each LGA, so what remains is change within an LGA over time.\n\nA variable can point one way when you compare LGAs with each other and the opposite way when you follow one LGA over time."
   },
   {
     "objectID": "projects/victorian-lga-crime.html#findings",
     "href": "projects/victorian-lga-crime.html#findings",
-    "title": "What predicts crime across Victoria’s local councils?",
+    "title": "What predicts crime across Victoria’s LGAs?",
     "section": "Findings",
     "text": "Findings\nFertility rate and education go with lower crime, and unemployment and population density with higher crime. Citizenship mix is significant across models, likely reflecting wider demographic and urban patterns rather than a direct effect.\nBachelor’s degree share shows why fixed effects matter. It is positive in the time fixed effects model, since inner Melbourne is both highly educated and high crime, but strongly negative within LGAs in the combined model (-245.5, p &lt; 0.001).\n\n\n\nFig 1. Income, unemployment and certificate share are only significant for offence counts, which means their effect is mostly about population size.\n\n\nElastic net gave the best out-of-sample accuracy and was selected for prediction. The fixed effects models remain the better tool for explaining change within an LGA."
   },
   {
+    "objectID": "projects/victorian-lga-crime.html#what-this-means-in-practice",
+    "href": "projects/victorian-lga-crime.html#what-this-means-in-practice",
+    "title": "What predicts crime across Victoria’s LGAs?",
+    "section": "What this means in practice",
+    "text": "What this means in practice\nThe paper’s conclusion points policy toward education, employment and community stability as levers for reducing crime locally. The wider lesson carries over to any regional data: a pattern across areas, like educated councils having more crime, can reverse within each area over time. Before acting on a cross-area comparison, check whether the effect holds once each area is compared with itself."
+  },
+  {
     "objectID": "projects/victorian-lga-crime.html#the-full-paper",
     "href": "projects/victorian-lga-crime.html#the-full-paper",
-    "title": "What predicts crime across Victoria’s local councils?",
+    "title": "What predicts crime across Victoria’s LGAs?",
     "section": "The full paper",
     "text": "The full paper\n\n\nDownload the paper (PDF)"
   },
   {
     "objectID": "projects/victorian-lga-crime.html#assumptions-and-limitations",
     "href": "projects/victorian-lga-crime.html#assumptions-and-limitations",
-    "title": "What predicts crime across Victoria’s local councils?",
+    "title": "What predicts crime across Victoria’s LGAs?",
     "section": "Assumptions and limitations",
     "text": "Assumptions and limitations\nAs set out in the paper:\n\nEducation and citizenship are census-only and were carried forward, which assumes they change gradually.\nUnemployment is assigned at regional rather than LGA level, which may add measurement error.\nModels use different outcomes (crime rate vs offence count) and transformations, so RMSE and MAE are not directly comparable and model selection leans on MAPE.\nFixed effects cannot account for time-varying omitted variables such as policing intensity, policy changes or social programs.\nLASSO and elastic net coefficients are biased by shrinkage and should be read as predictive, not causal.\nResults are area-level associations, so applying them to individuals risks the ecological fallacy."
   },
@@ -109,7 +116,7 @@
     "href": "index.html",
     "title": "My Portfolio",
     "section": "",
-    "text": "This portfolio pulls together analytics and research work from university coursework, personal projects, and student club work. Every write-up follows the same structure - the question I was trying to answer, the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, and the assumptions the analysis rests on. Full code for every project is linked on GitHub, so you can see exactly how each result was produced.\n\n\n\n\n\n\n\n\n\n\nCan a smarter strategy beat drafting off last season’s totals?\n\n\n\nPython\n\npandas\n\nnba_api\n\nStreamlit\n\npytest\n\nbacktesting\n\n\n\nA fantasy NBA draft assistant in Python - player projections, a lineup-aware draft engine and a leakage-free backtest over 13 seasons.\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nICU Mortality Probability Prediction\n\n\n\nR\n\ntidymodels\n\nLightGBM\n\nXGBoost\n\n\n\nFive model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, scored on a Kaggle leaderboard.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhat predicts crime across Victoria’s local councils?\n\n\n\nR\n\npanel-econometrics\n\nfixed-effects\n\nelastic-net\n\nchoropleth\n\n\n\nPanel econometrics on 78 Victorian LGAs, 2011-2024: fixed effects, LASSO and elastic net, as part of a three-person MSAC research team.\n\n\n\nMay 1, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan word frequencies alone tell sport from politics?\n\n\n\nR\n\ntm\n\nigraph\n\ntext-mining\n\nclustering\n\n\n\nClustering and network analysis on a hand-built corpus of 20 news articles, in R with tm and igraph.\n\n\n\nMay 29, 2025\n\n\n\n\n\n\nNo matching items"
+    "text": "This portfolio pulls together analytics and research work from university coursework, personal projects, and student club work. Every write-up follows the same structure - the question I was trying to answer, the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, and the assumptions the analysis rests on. Full code for every project is linked on GitHub, so you can see exactly how each result was produced.\n\n\n\n\n\n\n\n\n\n\nCan a smarter strategy beat drafting off last season’s totals?\n\n\n\nPython\n\npandas\n\nnba_api\n\nStreamlit\n\npytest\n\nbacktesting\n\n\n\nA fantasy NBA draft assistant in Python - player projections, a lineup-aware draft engine and a leakage-free backtest over 13 seasons.\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nICU Mortality Probability Prediction\n\n\n\nR\n\ntidymodels\n\nLightGBM\n\nXGBoost\n\n\n\nFive model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, scored on a Kaggle leaderboard.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhat predicts crime across Victoria’s LGAs?\n\n\n\nR\n\npanel-econometrics\n\nfixed-effects\n\nelastic-net\n\nchoropleth\n\n\n\nPanel econometrics on 78 Victorian LGAs, 2011-2024: fixed effects, LASSO and elastic net, as part of a three-person MSAC research team.\n\n\n\nMay 1, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan word frequencies alone tell sport from politics?\n\n\n\nR\n\ntm\n\nigraph\n\ntext-mining\n\nclustering\n\n\n\nClustering and network analysis on a hand-built corpus of 20 news articles, in R with tm and igraph.\n\n\n\nMay 29, 2025\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",
