@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://tlabagala.github.io/projects/text-mining-news-genres.html</loc>
-    <lastmod>2026-10-16T09:26:58.720Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tlabagala.github.io/projects/icu-mortality-prediction.html</loc>
-    <lastmod>2026-10-16T09:26:58.720Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tlabagala.github.io/about.html</loc>
-    <lastmod>2026-10-16T09:26:58.709Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tlabagala.github.io/index.html</loc>
-    <lastmod>2026-10-16T09:26:58.719Z</lastmod>
+    <loc>https://tlabagala.github.io/projects/victorian-lga-crime.html</loc>
+    <lastmod>2026-11-06T23:53:35.496Z</lastmod>
   </url>
   <url>
     <loc>https://tlabagala.github.io/projects/nba-fantasy-draft.html</loc>
-    <lastmod>2026-10-16T09:26:58.720Z</lastmod>
+    <lastmod>2026-11-06T23:53:35.496Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tlabagala.github.io/index.html</loc>
+    <lastmod>2026-11-06T23:53:35.495Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tlabagala.github.io/about.html</loc>
+    <lastmod>2026-11-06T23:53:35.480Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tlabagala.github.io/projects/icu-mortality-prediction.html</loc>
+    <lastmod>2026-11-06T23:53:35.496Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tlabagala.github.io/projects/text-mining-news-genres.html</loc>
+    <lastmod>2026-11-06T23:53:35.496Z</lastmod>
   </url>
 </urlset>

@@ -1,136 +1,52 @@
 [
   {
-    "objectID": "projects/text-mining-news-genres.html",
-    "href": "projects/text-mining-news-genres.html",
-    "title": "Can word frequencies alone tell sport from politics?",
+    "objectID": "projects/victorian-lga-crime.html",
+    "href": "projects/victorian-lga-crime.html",
+    "title": "What predicts crime across Victoria’s local councils?",
     "section": "",
-    "text": "Problem: Can unsupervised methods work out whether a news article is about sport, film or politics from its word frequencies alone?\nApproach: Hierarchical clustering on cosine distance, plus document and term co-occurrence networks, on a hand-built corpus of 20 articles.\nResult: 12 of 20 genre labels recovered (60%, against a 33% chance baseline). The main cause of errors was a preprocessing setting, not the clustering.\nSkills: R, tm, igraph, text preprocessing, clustering, network analysis, hypothesis testing."
+    "text": "Which demographic and economic factors explain the differences in crime rates across Victoria’s 78 local government areas (LGAs) between 2011 and 2024? This was a student research project for the Monash Statistical Analytics Club (MSAC), written with Sanjana Bhavin Lakhpatwala and Sayali Choudhary."
   },
   {
-    "objectID": "projects/text-mining-news-genres.html#the-question",
-    "href": "projects/text-mining-news-genres.html#the-question",
-    "title": "Can word frequencies alone tell sport from politics?",
-    "section": "The question",
-    "text": "The question\nGiven only the words a news article uses - no author, no section, no tags - can you work out what kind of article it is? I built a corpus of 20 articles across three genres (sport, film, politics) and tested whether unsupervised methods could recover those genre labels from term frequencies alone. The labels were held back and used only to score the result."
+    "objectID": "projects/victorian-lga-crime.html#the-question",
+    "href": "projects/victorian-lga-crime.html#the-question",
+    "title": "What predicts crime across Victoria’s local councils?",
+    "section": "",
+    "text": "Which demographic and economic factors explain the differences in crime rates across Victoria’s 78 local government areas (LGAs) between 2011 and 2024? This was a student research project for the Monash Statistical Analytics Club (MSAC), written with Sanjana Bhavin Lakhpatwala and Sayali Choudhary."
   },
   {
-    "objectID": "projects/text-mining-news-genres.html#data-and-cleaning",
-    "href": "projects/text-mining-news-genres.html#data-and-cleaning",
-    "title": "Can word frequencies alone tell sport from politics?",
+    "objectID": "projects/victorian-lga-crime.html#data-and-cleaning",
+    "href": "projects/victorian-lga-crime.html#data-and-cleaning",
+    "title": "What predicts crime across Victoria’s local councils?",
     "section": "Data and cleaning",
-    "text": "Data and cleaning\nThe corpus is 20 news articles published between November 2024 and June 2025, drawn from the BBC, the Guardian, ABC News, news.com.au, ESPN, Variety, Time Out and The Conversation. Each was saved as a plain text file named for its subject, giving a roughly even split: 7 sport, 6 film, 7 politics.\nPreprocessing followed the standard tm pipeline - strip numbers and punctuation, lowercase, drop English stopwords, collapse whitespace, then stem with Snowball. Three tokens survived and had to be removed by hand: the en dash, the opening curly quote, and the possessive 's. All three are non-ASCII, so removePunctuation never touched them - a reminder that a textbook pipeline will not match real scraped text without inspection.\nThe document term matrix was then trimmed with removeSparseTerms(sparse = 0.7), leaving 20 documents by 28 terms. That threshold is aggressive: it keeps only terms appearing in at least 30% of documents, which makes the matrix small enough to visualise but also, as it turns out, strips most of the genre-specific vocabulary.\nView the code on GitHub"
+    "text": "Data and cleaning\nThe panel covers 78 LGAs over 14 years (1,092 LGA-years). It joins Crime Statistics Agency Victoria offence data to ABS census data and other public indicators. Census variables only exist for 2011, 2016 and 2021, so each value was carried forward to the following years. A census-years-only regression gave the same signs and significance, which supports the fill. Unemployment is published by region, so each LGA was given its region’s rate."
   },
   {
-    "objectID": "projects/text-mining-news-genres.html#method-and-why-this-one",
-    "href": "projects/text-mining-news-genres.html#method-and-why-this-one",
-    "title": "Can word frequencies alone tell sport from politics?",
+    "objectID": "projects/victorian-lga-crime.html#method-and-why-this-one",
+    "href": "projects/victorian-lga-crime.html#method-and-why-this-one",
+    "title": "What predicts crime across Victoria’s local councils?",
     "section": "Method, and why this one",
-    "text": "Method, and why this one\nHierarchical clustering on cosine distance, with Ward linkage. Cosine rather than Euclidean because these documents differ substantially in length - the film reviews run to nearly 500 words while several sport pieces are under 150. On raw counts, Euclidean distance would read that length gap as topical difference and cluster long documents with long documents. Cosine normalises it away by comparing direction rather than magnitude.\nI then cut the tree at k=3 to match the three known genres, and separately built two co-occurrence networks from the binary document-term matrix: one linking documents that share terms, one linking terms that share documents. Eigenvector centrality on each identified the structurally important nodes.\n\nClustering gave a single hard label per document. The network showed that several documents genuinely sit between genres - which is the more honest description of what modern journalism looks like."
+    "text": "Method, and why this one\nThe models build on each other: pooled OLS as a baseline, then LGA, time and combined fixed effects, then factor analysis, LASSO and elastic net to deal with strongly correlated predictors. The time fixed effects model removes shocks that hit every LGA in the same year. The combined model also removes anything constant about each LGA, so what remains is change within an LGA over time.\n\nA variable can point one way when you compare LGAs with each other and the opposite way when you follow one LGA over time."
   },
   {
-    "objectID": "projects/text-mining-news-genres.html#findings",
-    "href": "projects/text-mining-news-genres.html#findings",
-    "title": "Can word frequencies alone tell sport from politics?",
+    "objectID": "projects/victorian-lga-crime.html#findings",
+    "href": "projects/victorian-lga-crime.html#findings",
+    "title": "What predicts crime across Victoria’s local councils?",
     "section": "Findings",
-    "text": "Findings\nClustering recovered the genre labels for 12 of 20 documents, or 60% accuracy against a 33% baseline. Better than chance, but a long way from reliable.\n\n\n\n\nFig 1. Cut at three clusters, the dendrogram recovers 12 of 20 labels - sport concentrates in one branch, while film and politics each split across two.\n\n\n\nThe errors are informative rather than random. The Brisbane Olympics article is labelled sport but landed in politics - it is largely about Queensland government funding. The Sydney FC piece is a sports story about a chairman appointment, and shares governance vocabulary with political reporting. Three political articles landed in the film cluster, all beside action films whose reviews borrow the language of conflict.\nThe document network makes the overlap visible in a way the dendrogram cannot.\n\n\n\n\nFig 2. Film articles occupy the centre of the document network - Mountainhead scores 1.00 on eigenvector centrality, Brexit_Weakening_Nature_Laws 0.96, Mission_Impossible 0.86.\n\n\n\nFive of the six film articles rank among the most central documents - an artefact worth naming, since film reviews are the longest documents here and so carry more of the surviving high-frequency terms. Centrality is partly measuring length.\nThe token network explains the 60% ceiling directly.\n\n\n\n\nFig 3. The terms left after sparse-term removal are journalistic filler - last, one, will, new and time are the most central, and none of them carry genre.\n\n\n\nNothing there distinguishes a film review from an election report. The sparsity threshold kept the terms appearing everywhere, which is exactly the set that separates nothing - the clustering was working from vocabulary whose signal had already been filtered out.\nOnly the bipartite view shows genre structure cleanly, because it keeps the document-term attachments instead of collapsing them into one projection.\n\n\n\n\nFig 4. In the bipartite view, govern and hous attach to the politics documents - the genre signal survives only when documents and terms are shown together.\n\n\n\nSentiment analysis was a secondary check, and it found nothing. Across nine two-sided t-tests - overall sentiment, positivity and uncertainty, each across all three genre pairs - not one reached p &lt; 0.05, before or after correction. Sport scores lowest on positivity descriptively, but at n = 20 that gap is not distinguishable from noise.\n\n\n\nFig 5. Sport sits lowest on positive sentiment, but no pairwise difference between genres reaches significance.\n\n\nThe tempting version of this result is available, which is worth being precise about. Test one-sided in the direction the boxplots already suggest and film beats sport on positivity at p = 0.037 - a hypothesis chosen after seeing the data, the only one of nine comparisons to clear the line, and it does not survive Bonferroni correction. Two-sided is the honest test here."
+    "text": "Findings\nFertility rate and education go with lower crime, and unemployment and population density with higher crime. Citizenship mix is significant across models, likely reflecting wider demographic and urban patterns rather than a direct effect.\nBachelor’s degree share shows why fixed effects matter. It is positive in the time fixed effects model, since inner Melbourne is both highly educated and high crime, but strongly negative within LGAs in the combined model (-245.5, p &lt; 0.001).\n\n\n\nFig 1. Income, unemployment and certificate share are only significant for offence counts, which means their effect is mostly about population size.\n\n\nElastic net gave the best out-of-sample accuracy and was selected for prediction. The fixed effects models remain the better tool for explaining change within an LGA."
   },
   {
-    "objectID": "projects/text-mining-news-genres.html#what-this-means-in-practice",
-    "href": "projects/text-mining-news-genres.html#what-this-means-in-practice",
-    "title": "Can word frequencies alone tell sport from politics?",
-    "section": "What this means in practice",
-    "text": "What this means in practice\nThe same pipeline is how you would start on unlabelled text in a business - customer feedback, support tickets, open-ended survey answers - to find themes before anyone has tagged them. The lesson that transfers is the sparsity threshold: the setting that made the networks readable also removed the vocabulary that mattered, so in practice I would tune it against a small hand-labelled sample before trusting the clusters. And documents that sit between groups are a finding, not an error - a ticket that is both a billing question and a complaint belongs in both queues, which a single hard cluster label cannot express."
+    "objectID": "projects/victorian-lga-crime.html#the-full-paper",
+    "href": "projects/victorian-lga-crime.html#the-full-paper",
+    "title": "What predicts crime across Victoria’s local councils?",
+    "section": "The full paper",
+    "text": "The full paper\n\n\nDownload the paper (PDF)"
   },
   {
-    "objectID": "projects/text-mining-news-genres.html#assumptions-and-limitations",
-    "href": "projects/text-mining-news-genres.html#assumptions-and-limitations",
-    "title": "Can word frequencies alone tell sport from politics?",
+    "objectID": "projects/victorian-lga-crime.html#assumptions-and-limitations",
+    "href": "projects/victorian-lga-crime.html#assumptions-and-limitations",
+    "title": "What predicts crime across Victoria’s local councils?",
     "section": "Assumptions and limitations",
-    "text": "Assumptions and limitations\nThe honest summary is that this shows the method working, not a result worth trusting.\n\nn = 20 is far too small. With 6 to 7 documents per genre the t-tests have almost no power, which is the most likely reason none of them detect anything. A null result at this sample size is not evidence that the genres have similar sentiment - it is mostly evidence that the design cannot tell.\nThe corpus is not a random sample. I chose the articles myself, so my own sense of a typical sport or film piece is baked into both sample and labels.\nGenre labels are my own judgement. Misclassifications concentrate in documents that genuinely span topics, so part of the 40% error is disagreement about the label rather than failure of the clustering.\nk=3 was imposed, not discovered. I cut the tree at the number of genres I already knew, and did not check whether the dendrogram supports three clusters.\nCentrality is confounded with document length, which I did not normalise for. That film articles are central is partly a finding that they are long.\nsparse = 0.7 was tuned for legible networks, not for accuracy. It removed the genre-specific vocabulary the task needed, and is the most likely cause of the 60% ceiling. I did not test other thresholds.\nStemming is lossy and was not validated. Snowball produces hous, includ, govern; I did not check what it merged.\n\nWhat this does not license: any claim about news genres in general, or that 60% is the achievable accuracy here. A larger corpus with a tuned sparsity threshold would almost certainly do better."
-  },
-  {
-    "objectID": "projects/text-mining-news-genres.html#reproducing-this",
-    "href": "projects/text-mining-news-genres.html#reproducing-this",
-    "title": "Can word frequencies alone tell sport from politics?",
-    "section": "Reproducing this",
-    "text": "Reproducing this\nWritten in R with tm, SnowballC, SentimentAnalysis, proxy and igraph, as four sequential scripts in the code repo.\nThe corpus is 20 copyrighted news articles and is not redistributed, but the derived document-term matrix is - so the clustering and all three network figures reproduce from the repo alone, with no corpus needed. SOURCES.md lists every article URL if you want to rebuild it and re-run the sentiment step. The layout seed is fixed, so the network figures come out identical."
-  },
-  {
-    "objectID": "projects/icu-mortality-prediction.html",
-    "href": "projects/icu-mortality-prediction.html",
-    "title": "ICU Mortality Probability Prediction",
-    "section": "",
-    "text": "Problem: Rank ICU patients by their risk of dying in hospital, using what is known when they arrive, so attention goes to the highest-risk patients first.\nApproach: Five model families compared under one fixed preprocessing recipe, then a LightGBM and XGBoost blend tuned with repeated cross-validation.\nResult: Out-of-fold ROC-AUC of 0.942; the top grade band started at 0.94. Logistic regression beat the neural network.\nSkills: R, tidymodels, LightGBM, XGBoost, feature engineering, cross-validation."
-  },
-  {
-    "objectID": "projects/icu-mortality-prediction.html#the-question",
-    "href": "projects/icu-mortality-prediction.html#the-question",
-    "title": "ICU Mortality Probability Prediction",
-    "section": "The question",
-    "text": "The question\nGiven only what is known about a patient at the moment they arrive in intensive care, how well can we predict whether they will die before discharge? The purpose is triage rather than explanation - ranking patients so that limited clinical attention flows toward the people most likely to need it.\nThe work was a Kaggle competition for a machine learning unit, graded on ROC-AUC on a hidden test set in bands topping out at 0.94. Submissions had to be probabilities, so nothing could be tuned to a threshold, and the leaderboard only showed the score on half the test set - the mark came from the other half."
-  },
-  {
-    "objectID": "projects/icu-mortality-prediction.html#data-and-cleaning",
-    "href": "projects/icu-mortality-prediction.html#data-and-cleaning",
-    "title": "ICU Mortality Probability Prediction",
-    "section": "Data and cleaning",
-    "text": "Data and cleaning\nA preprocessed extract of MIMIC-III, one row per ICU stay: first-day vital signs summarised as min, max and mean, demographics and admission details, plus a separate table of ICD-9 diagnosis codes. The outcome, HOSPITAL_EXPIRE_FLAG, is positive for roughly 11.2% of stays.\nThree parts needed care:\nAge had to be reconstructed. MIMIC shifts the date of birth of any patient over 89 roughly 300 years into the past as a de-identification measure, so a naive ADMITTIME - DOB returns ages in the hundreds. Ages were capped at 90, with an indicator kept, because being old enough to be date-shifted is itself a signal.\nThe diagnosis columns were unusable raw. Free-text DIAGNOSIS held about 5,000 unique values and behaved as an ID column, so it was dropped. The 555 ICD-9 codes were rolled into the ~17 standard chapters, and for the boosting pass also multi-hot encoded over the 300 most common codes.\nDerived features carried more signal than raw levels: per-vital ranges, shock index and pulse pressure. A heart rate of 110 means something different at a systolic pressure of 140 than at 80.\n\n\nCode\nfe_basic &lt;- function(df) {\n  df |&gt;\n    mutate(\n      age_days    = as.numeric(difftime(ADMITTIME, DOB, units = \"days\")),\n      AGE         = pmin(pmax(age_days / 365.25, 0), 90),\n      AGE_OVER_89 = as.integer(age_days / 365.25 &gt; 89),\n\n      HeartRate_Range = HeartRate_Max - HeartRate_Min,\n      SysBP_Range     = SysBP_Max     - SysBP_Min,\n\n      ShockIndex    = HeartRate_Mean / na_if(SysBP_Mean, 0),\n      PulsePressure = SysBP_Mean - DiasBP_Mean\n    ) |&gt;\n    select(-DOB, -ADMITTIME, -Diff, -DIAGNOSIS, -age_days)\n}\n\n\nEncoding is the step most likely to fail silently. Levels are fitted on train and applied to test, so an unseen test level becomes NA instead of quietly shifting every column to its right:\n\n\nCode\nfor (c in cat_cols) {\n  lev &lt;- unique(train_fe[[c]])\n  # -1L because factor() codes from 1, while LightGBM wants categoricals from 0\n  train_fe[[c]] &lt;- as.integer(factor(train_fe[[c]], levels = lev)) - 1L\n  test_fe[[c]]  &lt;- as.integer(factor(test_fe[[c]],  levels = lev)) - 1L\n}\n\n\nView the code on GitHub"
-  },
-  {
-    "objectID": "projects/icu-mortality-prediction.html#method-and-why-this-one",
-    "href": "projects/icu-mortality-prediction.html#method-and-why-this-one",
-    "title": "ICU Mortality Probability Prediction",
-    "section": "Method, and why this one",
-    "text": "Method, and why this one\nThe project ran in two passes. The first held preprocessing fixed - rare-level consolidation, one-hot encoding, then standardisation - and swapped only the model, so any difference in score came from the model family rather than the features. Five families were compared: logistic regression, kNN at k = 25, a random forest, a 16-unit single-layer MLP, and XGBoost.\nThe second pass took the winning family and pushed it: richer diagnosis features, stratified cross-validation repeated over 3 seeds x 5 folds with early stopping, and a 70/30 blend of LightGBM and XGBoost. Repeating the folds matters at an 11% positive rate, where a single 5-fold split carries enough noise to move the estimated AUC on its own:\n\n\nCode\nfor (seed in c(42L, 123L, 2024L)) {\n  fold_idx &lt;- make_folds(y, N_SPLITS, seed)   # stratified on the outcome\n  seed_oof &lt;- rep(0, length(y))\n\n  for (k in seq_along(fold_idx)) {\n    va &lt;- fold_idx[[k]]\n    tr &lt;- setdiff(seq_along(y), va)\n\n    dtr &lt;- lgb.Dataset(X[tr, ], label = y[tr], categorical_feature = cat_cols)\n    dva &lt;- lgb.Dataset(X[va, ], label = y[va], categorical_feature = cat_cols,\n                       reference = dtr)\n\n    m &lt;- lgb.train(c(lgb_params, list(seed = seed)), dtr, nrounds = 4000L,\n                   valids = list(val = dva), early_stopping_rounds = 100L)\n\n    seed_oof[va] &lt;- predict(m, X[va, ])       # each row scored by a model\n    test_lgb     &lt;- test_lgb + predict(m, X_test)   # that never saw it\n  }\n  oof_lgb &lt;- oof_lgb + seed_oof\n}\n\n\nThe blend weight came from the centre of the flat region of the weight sweep rather than its peak, since picking the exact top of a noisy curve is a quiet form of overfitting the validation set.\nBoosting rather than a linear model because clinical risk is threshold-like - an SpO2 below 88 is categorically bad - which trees represent natively. Two boosting libraries rather than one because LightGBM grows trees leaf-wise and XGBoost level-wise, so their errors are partly decorrelated and the average beats either alone.\n\nLogistic regression beat the neural network. On tabular data of this size, model capacity is not free - the extra flexibility has to be paid for in data, and here it could not be afforded."
-  },
-  {
-    "objectID": "projects/icu-mortality-prediction.html#findings",
-    "href": "projects/icu-mortality-prediction.html#findings",
-    "title": "ICU Mortality Probability Prediction",
-    "section": "Findings",
-    "text": "Findings\n\n\n\n\nFig 1. Tree-based models rank ICU mortality risk substantially better than distance- or neuron-based ones; in the like-for-like comparison the linear model finishes second only to the forest.\n\n\n\nWithin the controlled comparison the ordering was kNN 0.761, MLP 0.771, random forest ~0.81, logistic regression 0.829. Logistic regression finishing ahead of the neural network suggests mortality risk is broadly additive in these inputs, which is exactly the structure a linear model captures most efficiently. The kNN result is structural rather than a tuning failure: after one-hot encoding, distances concentrate, and a 25-patient neighbourhood contains under three deaths on average.\nThe final blend reached 0.942 out-of-fold. That number is not comparable to the four above it - it comes from a different evaluation scheme on a feature set several hundred columns wider, so much of the gap is features rather than algorithm."
-  },
-  {
-    "objectID": "projects/icu-mortality-prediction.html#what-this-means-in-practice",
-    "href": "projects/icu-mortality-prediction.html#what-this-means-in-practice",
-    "title": "ICU Mortality Probability Prediction",
-    "section": "What this means in practice",
-    "text": "What this means in practice\nA model like this would support clinical judgement, not replace it: a hospital could use it to order a review list so the highest-risk new admissions are seen first. Two things would have to change before that. The diagnosis codes would need replacing with information available at admission (see below), and the probabilities would need calibrating, because a ward planning staffing needs to know whether a score of 0.3 really means a 30% risk. The cost of errors is also lopsided - missing a patient who deteriorates is far worse than reviewing one who did not - so the alert threshold should be set on that trade-off, not on AUC."
-  },
-  {
-    "objectID": "projects/icu-mortality-prediction.html#assumptions-and-limitations",
-    "href": "projects/icu-mortality-prediction.html#assumptions-and-limitations",
-    "title": "ICU Mortality Probability Prediction",
-    "section": "Assumptions and limitations",
-    "text": "Assumptions and limitations\nFolds were stratified on the outcome, not grouped by patient. Splitting happened at ICU-stay level. If a patient contributes more than one stay, their rows can land in different folds and the model can effectively memorise them, inflating the out-of-fold estimate. Patient-level splitting via group_vfold_cv() is the fix. I have not quantified how much repeat admission exists in this extract, so I do not know the size of the effect.\nDiagnosis codes are not available at hour zero. ICD-9 codes are assigned over the stay and finalised at discharge, so using them to predict that stay’s outcome is defensible as a retrospective benchmark but would not transfer to real-time use.\nLogistic regression assumes independent observations and linearity in the log-odds. The first is questionable for the same repeat-admission reason; the second was not formally checked.\nThe probabilities are ranked, not calibrated. Rebalancing the positive class distorts the output scale and averaging fifteen models compresses it toward the middle. PR-AUC was computed alongside ROC-AUC, which is the right instinct at an 11% base rate, but no calibration plot was produced.\nNone of this licenses a claim that any feature causes mortality, or that acting on the model would change an outcome. It supports one claim only: the ranking is informative."
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "Hi there! My name is Tristan Labagala and I am a final year Bachelor of Commerce (Business Analytics)/Bachelor of Information Systems (Business Information Technology) student at Monash University. I am passionate about utilising data to uncover insights and solve real problems."
-  },
-  {
-    "objectID": "about.html#tools",
-    "href": "about.html#tools",
-    "title": "About",
-    "section": "Tools",
-    "text": "Tools\nR (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL · Excel · Quarto · Git · VS Code"
-  },
-  {
-    "objectID": "about.html#elsewhere",
-    "href": "about.html#elsewhere",
-    "title": "About",
-    "section": "Elsewhere",
-    "text": "Elsewhere\n\nGitHub\nLinkedIn"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "My Portfolio",
-    "section": "",
-    "text": "This portfolio pulls together analytics and research work from university coursework, personal projects, and student club work. Every write-up follows the same structure - the question I was trying to answer, the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, and the assumptions the analysis rests on. Full code for every project is linked on GitHub, so you can see exactly how each result was produced.\n\n\n\n\n\n\n\n\n\n\nCan a smarter strategy beat drafting off last season’s totals?\n\n\n\nPython\n\npandas\n\nnba_api\n\nStreamlit\n\npytest\n\nbacktesting\n\n\n\nA fantasy NBA draft assistant in Python - player projections, a lineup-aware draft engine and a leakage-free backtest over 13 seasons.\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nICU Mortality Probability Prediction\n\n\n\nR\n\ntidymodels\n\nLightGBM\n\nXGBoost\n\n\n\nFive model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, scored on a Kaggle leaderboard.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan word frequencies alone tell sport from politics?\n\n\n\nR\n\ntm\n\nigraph\n\ntext-mining\n\nclustering\n\n\n\nClustering and network analysis on a hand-built corpus of 20 news articles, in R with tm and igraph.\n\n\n\nMay 29, 2025\n\n\n\n\n\n\nNo matching items"
+    "text": "Assumptions and limitations\nAs set out in the paper:\n\nEducation and citizenship are census-only and were carried forward, which assumes they change gradually.\nUnemployment is assigned at regional rather than LGA level, which may add measurement error.\nModels use different outcomes (crime rate vs offence count) and transformations, so RMSE and MAE are not directly comparable and model selection leans on MAPE.\nFixed effects cannot account for time-varying omitted variables such as policing intensity, policy changes or social programs.\nLASSO and elastic net coefficients are biased by shrinkage and should be read as predictive, not causal.\nResults are area-level associations, so applying them to individuals risks the ecological fallacy."
   },
   {
     "objectID": "projects/nba-fantasy-draft.html",
@@ -187,5 +103,138 @@
     "title": "Can a smarter strategy beat drafting off last season’s totals?",
     "section": "Reproducing this",
     "text": "Reproducing this\nPython with pandas, nba_api, plotnine and pytest, plus a Streamlit app for draft day. The 72 tests run offline in seconds; a full backtest needs about 10 minutes of one-off API pulls. The code repo README lists every result table."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "My Portfolio",
+    "section": "",
+    "text": "This portfolio pulls together analytics and research work from university coursework, personal projects, and student club work. Every write-up follows the same structure - the question I was trying to answer, the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, and the assumptions the analysis rests on. Full code for every project is linked on GitHub, so you can see exactly how each result was produced.\n\n\n\n\n\n\n\n\n\n\nCan a smarter strategy beat drafting off last season’s totals?\n\n\n\nPython\n\npandas\n\nnba_api\n\nStreamlit\n\npytest\n\nbacktesting\n\n\n\nA fantasy NBA draft assistant in Python - player projections, a lineup-aware draft engine and a leakage-free backtest over 13 seasons.\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nICU Mortality Probability Prediction\n\n\n\nR\n\ntidymodels\n\nLightGBM\n\nXGBoost\n\n\n\nFive model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, scored on a Kaggle leaderboard.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhat predicts crime across Victoria’s local councils?\n\n\n\nR\n\npanel-econometrics\n\nfixed-effects\n\nelastic-net\n\nchoropleth\n\n\n\nPanel econometrics on 78 Victorian LGAs, 2011-2024: fixed effects, LASSO and elastic net, as part of a three-person MSAC research team.\n\n\n\nMay 1, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan word frequencies alone tell sport from politics?\n\n\n\nR\n\ntm\n\nigraph\n\ntext-mining\n\nclustering\n\n\n\nClustering and network analysis on a hand-built corpus of 20 news articles, in R with tm and igraph.\n\n\n\nMay 29, 2025\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "Hi there! My name is Tristan Labagala and I am a final year Bachelor of Commerce (Business Analytics)/Bachelor of Information Systems (Business Information Technology) student at Monash University. I am passionate about utilising data to uncover insights and solve real problems."
+  },
+  {
+    "objectID": "about.html#tools",
+    "href": "about.html#tools",
+    "title": "About",
+    "section": "Tools",
+    "text": "Tools\nR (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL · Excel · Quarto · Git · VS Code"
+  },
+  {
+    "objectID": "about.html#elsewhere",
+    "href": "about.html#elsewhere",
+    "title": "About",
+    "section": "Elsewhere",
+    "text": "Elsewhere\n\nGitHub\nLinkedIn"
+  },
+  {
+    "objectID": "projects/icu-mortality-prediction.html",
+    "href": "projects/icu-mortality-prediction.html",
+    "title": "ICU Mortality Probability Prediction",
+    "section": "",
+    "text": "Problem: Rank ICU patients by their risk of dying in hospital, using what is known when they arrive, so attention goes to the highest-risk patients first.\nApproach: Five model families compared under one fixed preprocessing recipe, then a LightGBM and XGBoost blend tuned with repeated cross-validation.\nResult: Out-of-fold ROC-AUC of 0.942; the top grade band started at 0.94. Logistic regression beat the neural network.\nSkills: R, tidymodels, LightGBM, XGBoost, feature engineering, cross-validation."
+  },
+  {
+    "objectID": "projects/icu-mortality-prediction.html#the-question",
+    "href": "projects/icu-mortality-prediction.html#the-question",
+    "title": "ICU Mortality Probability Prediction",
+    "section": "The question",
+    "text": "The question\nGiven only what is known about a patient at the moment they arrive in intensive care, how well can we predict whether they will die before discharge? The purpose is triage rather than explanation - ranking patients so that limited clinical attention flows toward the people most likely to need it.\nThe work was a Kaggle competition for a machine learning unit, graded on ROC-AUC on a hidden test set in bands topping out at 0.94. Submissions had to be probabilities, so nothing could be tuned to a threshold, and the leaderboard only showed the score on half the test set - the mark came from the other half."
+  },
+  {
+    "objectID": "projects/icu-mortality-prediction.html#data-and-cleaning",
+    "href": "projects/icu-mortality-prediction.html#data-and-cleaning",
+    "title": "ICU Mortality Probability Prediction",
+    "section": "Data and cleaning",
+    "text": "Data and cleaning\nA preprocessed extract of MIMIC-III, one row per ICU stay: first-day vital signs summarised as min, max and mean, demographics and admission details, plus a separate table of ICD-9 diagnosis codes. The outcome, HOSPITAL_EXPIRE_FLAG, is positive for roughly 11.2% of stays.\nThree parts needed care:\nAge had to be reconstructed. MIMIC shifts the date of birth of any patient over 89 roughly 300 years into the past as a de-identification measure, so a naive ADMITTIME - DOB returns ages in the hundreds. Ages were capped at 90, with an indicator kept, because being old enough to be date-shifted is itself a signal.\nThe diagnosis columns were unusable raw. Free-text DIAGNOSIS held about 5,000 unique values and behaved as an ID column, so it was dropped. The 555 ICD-9 codes were rolled into the ~17 standard chapters, and for the boosting pass also multi-hot encoded over the 300 most common codes.\nDerived features carried more signal than raw levels: per-vital ranges, shock index and pulse pressure. A heart rate of 110 means something different at a systolic pressure of 140 than at 80.\n\n\nCode\nfe_basic &lt;- function(df) {\n  df |&gt;\n    mutate(\n      age_days    = as.numeric(difftime(ADMITTIME, DOB, units = \"days\")),\n      AGE         = pmin(pmax(age_days / 365.25, 0), 90),\n      AGE_OVER_89 = as.integer(age_days / 365.25 &gt; 89),\n\n      HeartRate_Range = HeartRate_Max - HeartRate_Min,\n      SysBP_Range     = SysBP_Max     - SysBP_Min,\n\n      ShockIndex    = HeartRate_Mean / na_if(SysBP_Mean, 0),\n      PulsePressure = SysBP_Mean - DiasBP_Mean\n    ) |&gt;\n    select(-DOB, -ADMITTIME, -Diff, -DIAGNOSIS, -age_days)\n}\n\n\nEncoding is the step most likely to fail silently. Levels are fitted on train and applied to test, so an unseen test level becomes NA instead of quietly shifting every column to its right:\n\n\nCode\nfor (c in cat_cols) {\n  lev &lt;- unique(train_fe[[c]])\n  # -1L because factor() codes from 1, while LightGBM wants categoricals from 0\n  train_fe[[c]] &lt;- as.integer(factor(train_fe[[c]], levels = lev)) - 1L\n  test_fe[[c]]  &lt;- as.integer(factor(test_fe[[c]],  levels = lev)) - 1L\n}\n\n\nView the code on GitHub"
+  },
+  {
+    "objectID": "projects/icu-mortality-prediction.html#method-and-why-this-one",
+    "href": "projects/icu-mortality-prediction.html#method-and-why-this-one",
+    "title": "ICU Mortality Probability Prediction",
+    "section": "Method, and why this one",
+    "text": "Method, and why this one\nThe project ran in two passes. The first held preprocessing fixed - rare-level consolidation, one-hot encoding, then standardisation - and swapped only the model, so any difference in score came from the model family rather than the features. Five families were compared: logistic regression, kNN at k = 25, a random forest, a 16-unit single-layer MLP, and XGBoost.\nThe second pass took the winning family and pushed it: richer diagnosis features, stratified cross-validation repeated over 3 seeds x 5 folds with early stopping, and a 70/30 blend of LightGBM and XGBoost. Repeating the folds matters at an 11% positive rate, where a single 5-fold split carries enough noise to move the estimated AUC on its own:\n\n\nCode\nfor (seed in c(42L, 123L, 2024L)) {\n  fold_idx &lt;- make_folds(y, N_SPLITS, seed)   # stratified on the outcome\n  seed_oof &lt;- rep(0, length(y))\n\n  for (k in seq_along(fold_idx)) {\n    va &lt;- fold_idx[[k]]\n    tr &lt;- setdiff(seq_along(y), va)\n\n    dtr &lt;- lgb.Dataset(X[tr, ], label = y[tr], categorical_feature = cat_cols)\n    dva &lt;- lgb.Dataset(X[va, ], label = y[va], categorical_feature = cat_cols,\n                       reference = dtr)\n\n    m &lt;- lgb.train(c(lgb_params, list(seed = seed)), dtr, nrounds = 4000L,\n                   valids = list(val = dva), early_stopping_rounds = 100L)\n\n    seed_oof[va] &lt;- predict(m, X[va, ])       # each row scored by a model\n    test_lgb     &lt;- test_lgb + predict(m, X_test)   # that never saw it\n  }\n  oof_lgb &lt;- oof_lgb + seed_oof\n}\n\n\nThe blend weight came from the centre of the flat region of the weight sweep rather than its peak, since picking the exact top of a noisy curve is a quiet form of overfitting the validation set.\nBoosting rather than a linear model because clinical risk is threshold-like - an SpO2 below 88 is categorically bad - which trees represent natively. Two boosting libraries rather than one because LightGBM grows trees leaf-wise and XGBoost level-wise, so their errors are partly decorrelated and the average beats either alone.\n\nLogistic regression beat the neural network. On tabular data of this size, model capacity is not free - the extra flexibility has to be paid for in data, and here it could not be afforded."
+  },
+  {
+    "objectID": "projects/icu-mortality-prediction.html#findings",
+    "href": "projects/icu-mortality-prediction.html#findings",
+    "title": "ICU Mortality Probability Prediction",
+    "section": "Findings",
+    "text": "Findings\n\n\n\n\nFig 1. Tree-based models rank ICU mortality risk substantially better than distance- or neuron-based ones; in the like-for-like comparison the linear model finishes second only to the forest.\n\n\n\nWithin the controlled comparison the ordering was kNN 0.761, MLP 0.771, random forest ~0.81, logistic regression 0.829. Logistic regression finishing ahead of the neural network suggests mortality risk is broadly additive in these inputs, which is exactly the structure a linear model captures most efficiently. The kNN result is structural rather than a tuning failure: after one-hot encoding, distances concentrate, and a 25-patient neighbourhood contains under three deaths on average.\nThe final blend reached 0.942 out-of-fold. That number is not comparable to the four above it - it comes from a different evaluation scheme on a feature set several hundred columns wider, so much of the gap is features rather than algorithm."
+  },
+  {
+    "objectID": "projects/icu-mortality-prediction.html#what-this-means-in-practice",
+    "href": "projects/icu-mortality-prediction.html#what-this-means-in-practice",
+    "title": "ICU Mortality Probability Prediction",
+    "section": "What this means in practice",
+    "text": "What this means in practice\nA model like this would support clinical judgement, not replace it: a hospital could use it to order a review list so the highest-risk new admissions are seen first. Two things would have to change before that. The diagnosis codes would need replacing with information available at admission (see below), and the probabilities would need calibrating, because a ward planning staffing needs to know whether a score of 0.3 really means a 30% risk. The cost of errors is also lopsided - missing a patient who deteriorates is far worse than reviewing one who did not - so the alert threshold should be set on that trade-off, not on AUC."
+  },
+  {
+    "objectID": "projects/icu-mortality-prediction.html#assumptions-and-limitations",
+    "href": "projects/icu-mortality-prediction.html#assumptions-and-limitations",
+    "title": "ICU Mortality Probability Prediction",
+    "section": "Assumptions and limitations",
+    "text": "Assumptions and limitations\nFolds were stratified on the outcome, not grouped by patient. Splitting happened at ICU-stay level. If a patient contributes more than one stay, their rows can land in different folds and the model can effectively memorise them, inflating the out-of-fold estimate. Patient-level splitting via group_vfold_cv() is the fix. I have not quantified how much repeat admission exists in this extract, so I do not know the size of the effect.\nDiagnosis codes are not available at hour zero. ICD-9 codes are assigned over the stay and finalised at discharge, so using them to predict that stay’s outcome is defensible as a retrospective benchmark but would not transfer to real-time use.\nLogistic regression assumes independent observations and linearity in the log-odds. The first is questionable for the same repeat-admission reason; the second was not formally checked.\nThe probabilities are ranked, not calibrated. Rebalancing the positive class distorts the output scale and averaging fifteen models compresses it toward the middle. PR-AUC was computed alongside ROC-AUC, which is the right instinct at an 11% base rate, but no calibration plot was produced.\nNone of this licenses a claim that any feature causes mortality, or that acting on the model would change an outcome. It supports one claim only: the ranking is informative."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html",
+    "href": "projects/text-mining-news-genres.html",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "",
+    "text": "Problem: Can unsupervised methods work out whether a news article is about sport, film or politics from its word frequencies alone?\nApproach: Hierarchical clustering on cosine distance, plus document and term co-occurrence networks, on a hand-built corpus of 20 articles.\nResult: 12 of 20 genre labels recovered (60%, against a 33% chance baseline). The main cause of errors was a preprocessing setting, not the clustering.\nSkills: R, tm, igraph, text preprocessing, clustering, network analysis, hypothesis testing."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#the-question",
+    "href": "projects/text-mining-news-genres.html#the-question",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "The question",
+    "text": "The question\nGiven only the words a news article uses - no author, no section, no tags - can you work out what kind of article it is? I built a corpus of 20 articles across three genres (sport, film, politics) and tested whether unsupervised methods could recover those genre labels from term frequencies alone. The labels were held back and used only to score the result."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#data-and-cleaning",
+    "href": "projects/text-mining-news-genres.html#data-and-cleaning",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "Data and cleaning",
+    "text": "Data and cleaning\nThe corpus is 20 news articles published between November 2024 and June 2025, drawn from the BBC, the Guardian, ABC News, news.com.au, ESPN, Variety, Time Out and The Conversation. Each was saved as a plain text file named for its subject, giving a roughly even split: 7 sport, 6 film, 7 politics.\nPreprocessing followed the standard tm pipeline - strip numbers and punctuation, lowercase, drop English stopwords, collapse whitespace, then stem with Snowball. Three tokens survived and had to be removed by hand: the en dash, the opening curly quote, and the possessive 's. All three are non-ASCII, so removePunctuation never touched them - a reminder that a textbook pipeline will not match real scraped text without inspection.\nThe document term matrix was then trimmed with removeSparseTerms(sparse = 0.7), leaving 20 documents by 28 terms. That threshold is aggressive: it keeps only terms appearing in at least 30% of documents, which makes the matrix small enough to visualise but also, as it turns out, strips most of the genre-specific vocabulary.\nView the code on GitHub"
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#method-and-why-this-one",
+    "href": "projects/text-mining-news-genres.html#method-and-why-this-one",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "Method, and why this one",
+    "text": "Method, and why this one\nHierarchical clustering on cosine distance, with Ward linkage. Cosine rather than Euclidean because these documents differ substantially in length - the film reviews run to nearly 500 words while several sport pieces are under 150. On raw counts, Euclidean distance would read that length gap as topical difference and cluster long documents with long documents. Cosine normalises it away by comparing direction rather than magnitude.\nI then cut the tree at k=3 to match the three known genres, and separately built two co-occurrence networks from the binary document-term matrix: one linking documents that share terms, one linking terms that share documents. Eigenvector centrality on each identified the structurally important nodes.\n\nClustering gave a single hard label per document. The network showed that several documents genuinely sit between genres - which is the more honest description of what modern journalism looks like."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#findings",
+    "href": "projects/text-mining-news-genres.html#findings",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "Findings",
+    "text": "Findings\nClustering recovered the genre labels for 12 of 20 documents, or 60% accuracy against a 33% baseline. Better than chance, but a long way from reliable.\n\n\n\n\nFig 1. Cut at three clusters, the dendrogram recovers 12 of 20 labels - sport concentrates in one branch, while film and politics each split across two.\n\n\n\nThe errors are informative rather than random. The Brisbane Olympics article is labelled sport but landed in politics - it is largely about Queensland government funding. The Sydney FC piece is a sports story about a chairman appointment, and shares governance vocabulary with political reporting. Three political articles landed in the film cluster, all beside action films whose reviews borrow the language of conflict.\nThe document network makes the overlap visible in a way the dendrogram cannot.\n\n\n\n\nFig 2. Film articles occupy the centre of the document network - Mountainhead scores 1.00 on eigenvector centrality, Brexit_Weakening_Nature_Laws 0.96, Mission_Impossible 0.86.\n\n\n\nFive of the six film articles rank among the most central documents - an artefact worth naming, since film reviews are the longest documents here and so carry more of the surviving high-frequency terms. Centrality is partly measuring length.\nThe token network explains the 60% ceiling directly.\n\n\n\n\nFig 3. The terms left after sparse-term removal are journalistic filler - last, one, will, new and time are the most central, and none of them carry genre.\n\n\n\nNothing there distinguishes a film review from an election report. The sparsity threshold kept the terms appearing everywhere, which is exactly the set that separates nothing - the clustering was working from vocabulary whose signal had already been filtered out.\nOnly the bipartite view shows genre structure cleanly, because it keeps the document-term attachments instead of collapsing them into one projection.\n\n\n\n\nFig 4. In the bipartite view, govern and hous attach to the politics documents - the genre signal survives only when documents and terms are shown together.\n\n\n\nSentiment analysis was a secondary check, and it found nothing. Across nine two-sided t-tests - overall sentiment, positivity and uncertainty, each across all three genre pairs - not one reached p &lt; 0.05, before or after correction. Sport scores lowest on positivity descriptively, but at n = 20 that gap is not distinguishable from noise.\n\n\n\nFig 5. Sport sits lowest on positive sentiment, but no pairwise difference between genres reaches significance.\n\n\nThe tempting version of this result is available, which is worth being precise about. Test one-sided in the direction the boxplots already suggest and film beats sport on positivity at p = 0.037 - a hypothesis chosen after seeing the data, the only one of nine comparisons to clear the line, and it does not survive Bonferroni correction. Two-sided is the honest test here."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#what-this-means-in-practice",
+    "href": "projects/text-mining-news-genres.html#what-this-means-in-practice",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "What this means in practice",
+    "text": "What this means in practice\nThe same pipeline is how you would start on unlabelled text in a business - customer feedback, support tickets, open-ended survey answers - to find themes before anyone has tagged them. The lesson that transfers is the sparsity threshold: the setting that made the networks readable also removed the vocabulary that mattered, so in practice I would tune it against a small hand-labelled sample before trusting the clusters. And documents that sit between groups are a finding, not an error - a ticket that is both a billing question and a complaint belongs in both queues, which a single hard cluster label cannot express."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#assumptions-and-limitations",
+    "href": "projects/text-mining-news-genres.html#assumptions-and-limitations",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "Assumptions and limitations",
+    "text": "Assumptions and limitations\nThe honest summary is that this shows the method working, not a result worth trusting.\n\nn = 20 is far too small. With 6 to 7 documents per genre the t-tests have almost no power, which is the most likely reason none of them detect anything. A null result at this sample size is not evidence that the genres have similar sentiment - it is mostly evidence that the design cannot tell.\nThe corpus is not a random sample. I chose the articles myself, so my own sense of a typical sport or film piece is baked into both sample and labels.\nGenre labels are my own judgement. Misclassifications concentrate in documents that genuinely span topics, so part of the 40% error is disagreement about the label rather than failure of the clustering.\nk=3 was imposed, not discovered. I cut the tree at the number of genres I already knew, and did not check whether the dendrogram supports three clusters.\nCentrality is confounded with document length, which I did not normalise for. That film articles are central is partly a finding that they are long.\nsparse = 0.7 was tuned for legible networks, not for accuracy. It removed the genre-specific vocabulary the task needed, and is the most likely cause of the 60% ceiling. I did not test other thresholds.\nStemming is lossy and was not validated. Snowball produces hous, includ, govern; I did not check what it merged.\n\nWhat this does not license: any claim about news genres in general, or that 60% is the achievable accuracy here. A larger corpus with a tuned sparsity threshold would almost certainly do better."
+  },
+  {
+    "objectID": "projects/text-mining-news-genres.html#reproducing-this",
+    "href": "projects/text-mining-news-genres.html#reproducing-this",
+    "title": "Can word frequencies alone tell sport from politics?",
+    "section": "Reproducing this",
+    "text": "Reproducing this\nWritten in R with tm, SnowballC, SentimentAnalysis, proxy and igraph, as four sequential scripts in the code repo.\nThe corpus is 20 copyrighted news articles and is not redistributed, but the derived document-term matrix is - so the clustering and all three network figures reproduce from the repo alone, with no corpus needed. SOURCES.md lists every article URL if you want to rebuild it and re-run the sentiment step. The layout seed is fixed, so the network figures come out identical."
   }
 ]
