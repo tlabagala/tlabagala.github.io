@@ -1,10 +1,15 @@
 ---
 title: "What predicts crime across Victoria's LGAs?"
-description: "Panel econometrics on 78 Victorian LGAs, 2011-2024: fixed effects, LASSO and elastic net, as part of a three-person MSAC research team."
+description: "Elastic net predicted best (test R² 0.777) across 78 Victorian LGAs, 2011-2024; fixed effects showed which drivers hold within an area."
 date: 2026-05-01
-categories: [R, panel-econometrics, fixed-effects, elastic-net, choropleth]
-image: "../assets/figures/lga-crime-choropleth.png"
-image-alt: "Map of Victoria shaded by average crime rate per 100,000 for each local government area, 2011 to 2024."
+categories: [Econometrics & Statistics]
+image: "thumbs/victorian-lga-crime.png"
+image-alt: "Test R-squared of 0.777 predicting crime rates by LGA, across 78 Victorian LGAs, 14 years and 1,092 LGA-years."
+# Link previews keep the choropleth; the card uses the thumbnail.
+open-graph:
+  image: "../assets/figures/lga-crime-choropleth.png"
+twitter-card:
+  image: "../assets/figures/lga-crime-choropleth.png"
 resources:
   - "../assets/papers/victorian-lga-crime-msac-2026.pdf"
 ---

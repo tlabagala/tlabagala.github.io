@@ -1,17 +1,92 @@
 ---
 title: "About"
+code-tools: false
 ---
 
 ![](assets/headshot.jpg){.headshot fig-alt="Tristan Labagala"}
 
-Hi there! My name is Tristan Labagala and I am a final year Bachelor of Commerce (Business Analytics)/Bachelor of Information Systems (Business Information Technology) student at Monash University. I am passionate about utilising data to uncover insights and solve real problems.
+I'm Tristan Labagala, a Monash University Commerce and IT student majoring in Business Analytics and Business Information Systems, graduating in November 2026. The problems I like most start with messy data and end with a decision someone has to make. As a finance intern at JBS Pork Australia, that meant reconciling freight costs across the SAP and CSB ERP systems and building Excel dashboards that compared forecasts and budgets with actuals. At the Monash Statistical Analytics Club I lead a team of student analysts, which won Best Team at the inaugural Data Analytics Initiative Pitch Night in October 2026.
+
+## Experience
+
+::: {.timeline}
+::: {.tl-item}
+[Jul 2026 - present]{.tl-date}
+
+**Data Analytics Initiative Team Lead** · Monash Statistical Analytics Club (MSAC)\
+Leading student analysts; the team won Best Team at the inaugural MSAC DAI Pitch Night (Oct 2026).
+:::
+
+::: {.tl-item}
+[Jun - Jul 2026]{.tl-date}
+
+**Finance Intern** · JBS Pork Australia\
+Freight cost reconciliation across the SAP and CSB ERP systems; Excel dashboards for forecast vs actual and actual vs budget.
+:::
+
+::: {.tl-item}
+[Nov 2025 - present]{.tl-date}
+
+**Sponsorship Officer** · Computing and Commerce Association (CCA)\
+Secured a record 12+ sponsors for 2026.
+:::
+
+::: {.tl-item}
+[Feb 2025 - present]{.tl-date}
+
+**Referee Supervisor** · Westgate Basketball Association
+:::
+
+::: {.tl-item}
+[Sep 2023 - present]{.tl-date}
+
+**Control Room Operator** · Melbourne Park
+:::
+
+::: {.tl-item}
+[Nov 2022 - Aug 2025]{.tl-date}
+
+**Basketball Coach** · Westgate Imperials
+:::
+:::
+
+## Education
+
+::: {.timeline}
+::: {.tl-item}
+[Graduating Nov 2026]{.tl-date}
+
+**Bachelor of Commerce / Bachelor of Information Technology** · Monash University\
+Majoring in Business Analytics and Business Information Systems.
+:::
+
+::: {.tl-item}
+[Study tour]{.tl-date}
+
+**Data Science and AI study tour** · HEC Montréal\
+High Distinction.
+:::
+:::
 
 ## Tools
 
-R (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM,
-matplotlib) · SQL · Excel · Quarto · Git · VS Code 
+::: {.tool-groups}
+**Analysis**
+: R (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL · Excel
 
-## Elsewhere
+**BI**
+: Power BI
 
-- [GitHub](https://github.com/tlabagala)
-- [LinkedIn](https://www.linkedin.com/in/tristan-labagala/)
+**Workflow**
+: Git · Quarto · VS Code
+:::
+
+## Contact
+
+Email me at [tristan.labagala@gmail.com](mailto:tristan.labagala@gmail.com), or find me on LinkedIn and GitHub.
+
+::: {.hero-actions}
+[<i class="bi bi-linkedin" aria-hidden="true"></i> LinkedIn](https://www.linkedin.com/in/tristan-labagala/){.btn .btn-primary}
+[<i class="bi bi-envelope" aria-hidden="true"></i> Email](mailto:tristan.labagala@gmail.com){.btn .btn-outline-primary}
+[<i class="bi bi-github" aria-hidden="true"></i> GitHub](https://github.com/tlabagala){.btn .btn-outline-primary}
+:::

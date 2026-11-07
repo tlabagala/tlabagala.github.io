@@ -1,10 +1,15 @@
 ---
 title: "A question in plain English?"
-description: "One line: the method, the data, the scope."
+description: "Lead with the headline result and its baseline, then the method in a few words."
 date: 2026-01-01
-categories: [R, tool-two, topic]
-image: "../assets/figures/your-thumbnail.png"
-image-alt: "Short description of the thumbnail figure."
+categories: [Machine Learning]
+image: "thumbs/your-slug.png"
+image-alt: "Short description of the thumbnail."
+# Keep the full figure as the link preview; the card uses the thumbnail.
+open-graph:
+  image: "../assets/figures/your-figure.png"
+twitter-card:
+  image: "../assets/figures/your-figure.png"
 ---
 
 <!--
@@ -13,7 +18,10 @@ template in place - the leading underscore keeps it off the site.
 
 Rules:
 - Title is a plain-English question, not a method name.
-- categories become the filter pills and per-card badges: use real tool names.
+- categories are 1-2 broad groups from: Machine Learning, Econometrics &
+  Statistics, Data Engineering & BI, Business Analysis. Tool names go in the
+  summary box Skills line, not here.
+- Add a card thumbnail to projects/thumbs/make_thumbnails.R and re-run it.
 - Keep the body roughly 600-900 words.
 - Follow the section order below. The summary box and the "Assumptions and
   limitations" section are required, not optional.
@@ -56,9 +64,7 @@ just "I used fixed effects" but why fixed effects rather than pooled OLS.
 
 Display one or two figures. Preferred pattern is a pre-exported PNG:
 
-::: {.column-page}
-![Fig 1. Caption states the finding, not the chart type.](../assets/figures/your-figure.png){.figure-wide}
-:::
+![Fig 1. Caption states the finding, not the chart type.](../assets/figures/your-figure.png)
 
 State the headline numbers in the prose around the figure.
 

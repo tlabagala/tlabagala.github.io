@@ -1,22 +1,46 @@
 ---
-title: "My Portfolio"
+title: "Tristan Labagala"
+code-tools: false
+description-meta: "Analytics, research and data projects by Tristan Labagala - R, Python and SQL."
+# The title renders as the name at the top of the intro block; the home body
+# class lets styles.scss size it as a hero heading on this page only.
+body-classes: home
+# Quarto would otherwise use the first card's thumbnail as this page's link
+# preview. Pin the preview the live site already uses.
+open-graph:
+  image: assets/figures/nba-head-to-head.png
+  image-alt: "Interval chart of each draft strategy's edge over a naive draft, with the engine on the aging board highest."
+twitter-card:
+  image: assets/figures/nba-head-to-head.png
+  image-alt: "Interval chart of each draft strategy's edge over a naive draft, with the engine on the aging board highest."
 listing:
   id: work
   contents: projects
   type: grid
   sort: "date desc"
-  categories: true
+  # With four projects in four broad groups, a filter sidebar adds little. Turn
+  # this back on once there are enough pages for filtering to help.
+  categories: false
   sort-ui: false
   filter-ui: false
   fields: [image, title, description, categories, date]
 page-layout: full
+toc: false
 ---
 
-This portfolio pulls together analytics and research work from university coursework, personal projects,
-and student club work. Every write-up follows the same structure - the question I was trying to answer, 
-the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, 
-and the assumptions the analysis rests on. Full code for every project is linked on GitHub, so you can see 
-exactly how each result was produced.
+::: {.hero}
+[Bachelor of Commerce / Bachelor of IT · Monash University · Melbourne]{.hero-meta}
+
+I turn messy business data into decisions people can act on - from reconciling freight costs across two ERP systems as a finance intern at JBS, to leading student analytics teams at the Monash Statistical Analytics Club. Each project below starts with a question and ends with what the answer means in practice.
+
+::: {.hero-actions}
+[<i class="bi bi-linkedin" aria-hidden="true"></i> LinkedIn](https://www.linkedin.com/in/tristan-labagala/){.btn .btn-primary}
+[<i class="bi bi-envelope" aria-hidden="true"></i> Email](mailto:tristan.labagala@gmail.com){.btn .btn-outline-primary}
+[<i class="bi bi-github" aria-hidden="true"></i> GitHub](https://github.com/tlabagala){.btn .btn-outline-primary}
+:::
+:::
+
+## Projects {.listing-heading}
 
 ::: {#work}
 :::

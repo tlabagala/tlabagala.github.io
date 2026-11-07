@@ -115,9 +115,14 @@ charts look designed rather than default.
 
 1. Copy `projects/_template.qmd` to `projects/<slug>.qmd`.
 2. Fill the YAML header: `title`, `description`, `date`, `categories`, `image`.
-   The `categories` become the filter pills and the per-card tool badges, so use
-   real tool names (e.g. `[R, fixest, panel-econometrics]`).
-3. Point `image:` at a thumbnail in `assets/figures/`.
+   `description` is the card text: lead with the headline result. `categories`
+   are 1-2 broad groups from Machine Learning, Econometrics & Statistics, Data
+   Engineering & BI, Business Analysis - tool names belong in the summary box
+   Skills line instead.
+3. Add the page to `projects/thumbs/make_thumbnails.R` (headline number plus a
+   simple visual, numbers taken from the page), re-run it, and point `image:` at
+   `thumbs/<slug>.png`. Keep the full figure as the link preview with
+   `open-graph: image:` and `twitter-card: image:`.
 4. Fill the summary box, then write the body in the fixed section order (see
    the template). Keep the body to roughly 600-900 words.
 5. `quarto preview` to check it.
@@ -140,8 +145,9 @@ automatically from the new page's YAML header.
 - Figure captions state the finding, not the chart type. "Cost per tonne
   diverged from budget from Q3, driven by rate not volume", not "Cost over time".
 - Keep the body text column narrow (set by `grid` in `_quarto.yml`, not in
-  `styles.scss`); let key figures break out wider using a `::: {.column-page}`
-  fenced div.
+  `styles.scss`). Every in-page figure and image spans exactly the text column
+  (set in `styles.scss`) - do not wrap figures in `::: {.column-page}` or other
+  breakout divs.
 
 ## Employer-data caution
 

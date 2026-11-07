@@ -176,17 +176,14 @@ grid:
 ```
 
 Keep it there. Capping `main.content` in `styles.scss` instead squeezes Quarto's
-whole layout grid, so `.column-page` figures end up narrower than the text they
-are meant to break out past. That is why `styles.scss` sets
+whole layout grid. That is why `styles.scss` sets
 `main.content { max-width: none; }`.
 
-To let one figure break out past that column, wrap it in a fenced div in the
-`.qmd`:
+Figures and images span exactly the text column - `styles.scss` sizes them to
+it - so a plain image line is all a page needs:
 
 ```markdown
-::: {.column-page}
 ![Caption stating the finding](../assets/figures/name.png)
-:::
 ```
 
 ### Project summary box

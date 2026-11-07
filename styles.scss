@@ -20,20 +20,20 @@ $primary: #185fa5;
 /*-- scss:rules --*/
 
 // Reading measure is set by grid.body-width in _quarto.yml, NOT here. Capping
-// main.content squeezes Quarto's whole layout grid, which shrinks .column-page
-// figures until they end up narrower than the text they are meant to break out
-// past. Leave this uncapped and tune the grid instead.
+// main.content squeezes Quarto's whole layout grid. Leave this uncapped and
+// tune the grid instead.
 main.content {
   max-width: none;
 }
 
-// Break a figure out past the text column. Apply with a fenced div:
-// ::: {.column-page}
-// No cap, so a wide figure fills whatever the column-page grid track allows.
-.column-page .figure-wide,
-.figure-wide {
+// In-page figures and images span exactly the text column: smaller images
+// scale up to it and wider ones scale down, so every figure lines up with the
+// prose. The About-page headshot and listing thumbnails keep their own sizing.
+main.content .quarto-figure img,
+main.content p > img:not(.headshot) {
+  width: 100%;
   max-width: 100%;
-  margin-inline: auto;
+  height: auto;
 }
 
 // Title block. Kicker-style category, serif title, muted description.
@@ -65,6 +65,16 @@ main.content {
   border-color: #b4b2a9;
 }
 .quarto-grid-item .card-img-top {
+  border-radius: 12px 12px 0 0;
+  margin-bottom: 0;
+}
+// Thumbnails are drawn at 2:1 (projects/thumbs/make_thumbnails.R). Size the
+// image by aspect ratio, not a fixed height, so a narrow phone card shows the
+// whole thumbnail instead of cropping its sides.
+.quarto-grid-item .card-img-top img.thumbnail-image {
+  height: auto !important;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
   border-radius: 12px 12px 0 0;
 }
 .listing-category {
@@ -137,5 +147,144 @@ img.headshot,
   .headshot img {
     display: block;
     margin: 0 auto 1.5rem;
+  }
+}
+
+// Homepage name: Quarto's page title, sized up as the hero heading.
+body.home #title-block-header {
+  margin-bottom: 0.4rem;
+
+  h1.title {
+    font-size: clamp(2rem, 6vw, 2.75rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0.5rem 0 0;
+  }
+}
+
+// Homepage intro block: name, degree line, pitch and contact buttons. Sits
+// above the project grid so a reader knows who this is before scrolling.
+.hero {
+  max-width: 760px;
+  margin: 0 0 2.5rem;
+
+  .hero-meta {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #5f5e5a;
+    margin-bottom: 1.1rem;
+  }
+  p {
+    font-size: 1.1rem;
+    line-height: 1.65;
+  }
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.3rem;
+
+  // Pandoc wraps the links in a <p>; let the links themselves be the flex items.
+  p {
+    display: contents;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 8px;
+    padding: 0.5rem 1.05rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+}
+
+// Section label above the grid, quieter than a page heading.
+h2.listing-heading {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5f5e5a;
+  border: 0;
+  margin: 0 0 1rem;
+}
+
+// Phones: full-width buttons stack evenly instead of wrapping ragged.
+@media (max-width: 575.98px) {
+  .hero {
+    margin-bottom: 2rem;
+    p { font-size: 1.02rem; }
+  }
+  .hero-actions .btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
+
+// About page timeline: date in a narrow left column, role and detail beside
+// it. Collapses to date-above-role on phones.
+.timeline {
+  margin: 0.5rem 0 1rem;
+}
+.tl-item {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  column-gap: 1.25rem;
+  padding: 0.7rem 0;
+  border-top: 0.5px solid #e6e4dd;
+
+  &:first-child {
+    border-top: 0;
+  }
+  > p {
+    grid-column: 2;
+    margin: 0;
+    line-height: 1.55;
+  }
+  > p:first-child {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+}
+.tl-date {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #5f5e5a;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+@media (max-width: 575.98px) {
+  .tl-item {
+    grid-template-columns: 1fr;
+    > p:first-child {
+      grid-column: 1;
+      grid-row: auto;
+    }
+    > p {
+      grid-column: 1;
+    }
+  }
+}
+
+// About page tool groups: group label beside its tools.
+.tool-groups dl {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: 0.5rem 1.25rem;
+  margin: 0;
+
+  dt { font-weight: 600; }
+  dd { margin: 0; }
+}
+@media (max-width: 575.98px) {
+  .tool-groups dl {
+    grid-template-columns: 1fr;
+    dd { margin-bottom: 0.6rem; }
   }
 }

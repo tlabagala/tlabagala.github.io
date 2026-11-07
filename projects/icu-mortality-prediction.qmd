@@ -1,10 +1,15 @@
 ---
-title: "ICU Mortality Probability Prediction"
-description: "Five model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, scored on a Kaggle leaderboard."
+title: "Can first-day ICU data flag the patients most at risk?"
+description: "Out-of-fold ROC-AUC of 0.942 ranking ICU mortality risk. Five model families benchmarked, then a LightGBM + XGBoost blend in R."
 date: 2026-05-24
-categories: [R, tidymodels, LightGBM, XGBoost]
-image: "../assets/figures/icu-model-comparison.png"
-image-alt: "Horizontal bar chart of ROC-AUC by model, with the boosting blend highest at 0.942."
+categories: [Machine Learning]
+image: "thumbs/icu-mortality-prediction.png"
+image-alt: "ROC-AUC of 0.942 ranking ICU mortality risk, beside bars for five models with the boosting blend highest."
+# Link previews keep the full in-page figure; the card uses the thumbnail.
+open-graph:
+  image: "../assets/figures/icu-model-comparison.png"
+twitter-card:
+  image: "../assets/figures/icu-model-comparison.png"
 # The page used to live at icu-mortality-prediction_1.html; keep old links working.
 aliases:
   - icu-mortality-prediction_1.html
@@ -90,7 +95,8 @@ for (c in cat_cols) {
 }
 ```
 
-[View the code on GitHub](https://github.com/tlabagala/your-repo)
+<!-- TODO(Tristan): replace with the ICU project repo URL, then remove the [TODO] marker. -->
+[TODO] View the code on GitHub (repo link to come)
 
 ## Method, and why this one
 
@@ -146,9 +152,7 @@ alone.
 
 ## Findings
 
-::: {.column-page}
-![Fig 1. Tree-based models rank ICU mortality risk substantially better than distance- or neuron-based ones; in the like-for-like comparison the linear model finishes second only to the forest.](../assets/figures/icu-model-comparison.png){.figure-wide}
-:::
+![Fig 1. Tree-based models rank ICU mortality risk substantially better than distance- or neuron-based ones; in the like-for-like comparison the linear model finishes second only to the forest.](../assets/figures/icu-model-comparison.png)
 
 Within the controlled comparison the ordering was kNN 0.761, MLP 0.771, random
 forest ~0.81, logistic regression 0.829. Logistic regression finishing ahead of the

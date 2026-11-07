@@ -10,7 +10,7 @@ execute:
 
 website:
   title: "Tristan Labagala"
-  description: "Data analytics and research projects in R, Python, and SQL."
+  description: "Analytics, research and data projects by Tristan Labagala - R, Python and SQL."
   site-url: "https://tlabagala.github.io"
   favicon: assets/favicon.png
   # Link previews when a page is shared on LinkedIn, Slack or similar. Project
