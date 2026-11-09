@@ -1,6 +1,6 @@
 ---
 title: "ICU Mortality Probability Prediction"
-description: "Five model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, scored on a Kaggle leaderboard."
+description: "Five model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, built for a Kaggle competition."
 date: 2026-05-24
 categories: [R, tidymodels, LightGBM, XGBoost]
 image: "../assets/figures/icu-model-comparison.png"
@@ -90,17 +90,16 @@ for (c in cat_cols) {
 }
 ```
 
-[View the code on GitHub](https://github.com/tlabagala/your-repo)
+[View the code on GitHub](https://github.com/tlabagala/icu-mortality-project)
 
 ## Method, and why this one
 
 The project ran in two passes. The first held preprocessing fixed - rare-level
-consolidation, one-hot encoding, then standardisation - and swapped only the model,
-so any difference in score came from the model family rather than the features.
-Five families were compared: logistic regression, kNN at k = 25, a random forest, a
-16-unit single-layer MLP, and XGBoost.
+consolidation, one-hot encoding, then standardisation - and swapped only the model.
+Five families were fitted this way: logistic regression, kNN at k = 25, a random
+forest, a 16-unit single-layer MLP, and XGBoost.
 
-The second pass took the winning family and pushed it: richer diagnosis features,
+The second pass pushed gradient boosting further: richer diagnosis features,
 stratified cross-validation repeated over 3 seeds x 5 folds with early stopping,
 and a 70/30 blend of LightGBM and XGBoost. Repeating the folds matters at an 11%
 positive rate, where a single 5-fold split carries enough noise to move the
@@ -147,20 +146,25 @@ alone.
 ## Findings
 
 ::: {.column-page}
-![Fig 1. Tree-based models rank ICU mortality risk substantially better than distance- or neuron-based ones; in the like-for-like comparison the linear model finishes second only to the forest.](../assets/figures/icu-model-comparison.png){.figure-wide}
+![Fig 1. The boosting blend reached 0.942 out-of-fold and logistic regression (0.829) scored above the random forest (~0.81), but these scores come from different evaluations.](../assets/figures/icu-model-comparison.png){.figure-wide}
 :::
 
-Within the controlled comparison the ordering was kNN 0.761, MLP 0.771, random
-forest ~0.81, logistic regression 0.829. Logistic regression finishing ahead of the
-neural network suggests mortality risk is broadly additive in these inputs, which
-is exactly the structure a linear model captures most efficiently. The kNN result
-is structural rather than a tuning failure: after one-hot encoding, distances
-concentrate, and a 25-patient neighbourhood contains under three deaths on average.
+On the public leaderboard, kNN scored 0.761, the MLP 0.771 and logistic regression
+0.829. Logistic regression finishing ahead of the neural network suggests mortality
+risk is broadly additive in these inputs, which is exactly the structure a linear
+model captures most efficiently. The kNN result is structural rather than a tuning
+failure: after one-hot encoding, distances concentrate, and a 25-patient
+neighbourhood contains under three deaths on average.
 
-The final blend reached 0.942 out-of-fold. That number is not comparable to the
-four above it - it comes from a different evaluation scheme on a feature set
-several hundred columns wider, so much of the gap is features rather than
-algorithm.
+The random forest baseline reached ~0.81, but that figure was reported under
+cross-validation rather than the leaderboard, so its gap to logistic regression is
+not a clean ranking. The first-pass XGBoost has no reported score, so it is not
+shown.
+
+The final blend reached 0.942 out-of-fold. That number is not directly comparable to
+the leaderboard scores above - it comes from a different evaluation scheme on a
+feature set several hundred columns wider, so much of the gap is features rather
+than algorithm.
 
 ## What this means in practice
 
