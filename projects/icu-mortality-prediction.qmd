@@ -2,7 +2,7 @@
 title: "ICU Mortality Probability Prediction"
 description: "Five model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, built for a Kaggle competition."
 date: 2026-05-24
-categories: [R, tidymodels, LightGBM, XGBoost]
+categories: [R, Machine learning, Health]
 image: "../assets/figures/icu-model-comparison.png"
 image-alt: "Horizontal bar chart of ROC-AUC by model, with the boosting blend highest at 0.942."
 # The page used to live at icu-mortality-prediction_1.html; keep old links working.

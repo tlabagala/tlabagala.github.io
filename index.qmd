@@ -15,8 +15,51 @@ page-layout: full
 This portfolio pulls together analytics and research work from university coursework, personal projects,
 and student club work. Every write-up follows the same structure - the question I was trying to answer, 
 the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, 
-and the assumptions the analysis rests on. Full code for every project is linked on GitHub, so you can see 
-exactly how each result was produced.
+and the assumptions the analysis rests on. Each write-up links to its full code on GitHub or its full paper,
+so you can see how the results were produced.
 
 ::: {#work}
 :::
+
+```{=html}
+<script>
+// Group the flat category sidebar into facets. Quarto lists categories
+// alphabetically in one list; this moves each one under its facet heading.
+// To add a category, add it to the right facet here (and in CLAUDE.md).
+// Anything not listed falls into "Other" so a new category is never hidden.
+const categoryFacets = {
+  "Language": ["R", "Python", "SQL"],
+  "Problem type": ["Machine learning", "Econometrics", "Forecasting",
+                   "Text analytics", "Simulation"],
+  "Domain": ["Health", "Sport", "Public policy", "Media"]
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.querySelector(".quarto-listing-category");
+  if (!container) return;
+  const decode = (el) => {
+    try { return decodeURIComponent(atob(el.dataset.category)); }
+    catch (e) { return null; }
+  };
+  const items = new Map();
+  for (const el of container.querySelectorAll(".category")) {
+    const name = decode(el);
+    if (name) items.set(name, el);   // "All" has an empty value; it stays on top
+  }
+  const addGroup = (title, names) => {
+    const present = names.filter((n) => items.has(n));
+    if (!present.length) return;
+    const heading = document.createElement("div");
+    heading.className = "category-facet-title";
+    heading.textContent = title;
+    container.appendChild(heading);
+    for (const n of present) {
+      container.appendChild(items.get(n));
+      items.delete(n);
+    }
+  };
+  for (const [title, names] of Object.entries(categoryFacets)) addGroup(title, names);
+  addGroup("Other", [...items.keys()]);
+});
+</script>
+```

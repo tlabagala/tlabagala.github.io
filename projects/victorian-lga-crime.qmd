@@ -2,7 +2,7 @@
 title: "What predicts crime across Victoria's LGAs?"
 description: "Panel econometrics on 78 Victorian LGAs, 2011-2024: fixed effects, LASSO and elastic net, as part of a three-person MSAC research team."
 date: 2026-05-01
-categories: [R, panel-econometrics, fixed-effects, elastic-net, choropleth]
+categories: [R, Econometrics, Machine learning, Public policy]
 image: "../assets/figures/lga-crime-choropleth.png"
 image-alt: "Map of Victoria shaded by average crime rate per 100,000 for each local government area, 2011 to 2024."
 resources:

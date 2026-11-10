@@ -2,7 +2,7 @@
 title: "Can a smarter strategy beat drafting off last season's totals?"
 description: "A fantasy NBA draft assistant in Python - player projections, a lineup-aware draft engine and a leakage-free backtest over 13 seasons."
 date: 2026-10-16
-categories: [Python, pandas, nba_api, Streamlit, pytest, backtesting]
+categories: [Python, Forecasting, Simulation, Sport]
 image: "../assets/figures/nba-head-to-head.png"
 image-alt: "Interval chart of each draft strategy's edge over a naive draft, with the engine on the aging board highest."
 ---

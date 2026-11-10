@@ -2,7 +2,7 @@
 title: "A question in plain English?"
 description: "One line: the method, the data, the scope."
 date: 2026-01-01
-categories: [R, tool-two, topic]
+categories: [R, Machine learning, Health]
 image: "../assets/figures/your-thumbnail.png"
 image-alt: "Short description of the thumbnail figure."
 ---
@@ -13,7 +13,9 @@ template in place - the leading underscore keeps it off the site.
 
 Rules:
 - Title is a plain-English question, not a method name.
-- categories become the filter pills and per-card badges: use real tool names.
+- categories become the filter pills and per-card badges. Keep them broad,
+  one language + one or two problem types + one domain, drawn from the
+  taxonomy in CLAUDE.md. Specific packages go in the Skills line instead.
 - Keep the body roughly 600-900 words.
 - Follow the section order below. The summary box and the "Assumptions and
   limitations" section are required, not optional.

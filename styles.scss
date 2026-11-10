@@ -72,6 +72,16 @@ main.content {
   letter-spacing: 0.02em;
 }
 
+// Facet headings injected into the category sidebar by index.qmd.
+.quarto-listing-category .category-facet-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a8880;
+  margin: 1rem 0 0.25rem;
+}
+
 // Figure captions: quieter, left-aligned, so the finding reads as an aside.
 figcaption, .figure-caption {
   font-size: 0.82rem;

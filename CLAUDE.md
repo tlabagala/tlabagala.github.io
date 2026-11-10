@@ -115,8 +115,20 @@ charts look designed rather than default.
 
 1. Copy `projects/_template.qmd` to `projects/<slug>.qmd`.
 2. Fill the YAML header: `title`, `description`, `date`, `categories`, `image`.
-   The `categories` become the filter pills and the per-card tool badges, so use
-   real tool names (e.g. `[R, fixest, panel-econometrics]`).
+   The `categories` become the filter pills and the per-card badges. Keep them
+   broad so they aggregate across projects: one language, one or two problem
+   types, and one domain (e.g. `[R, Econometrics, Machine learning, Public policy]`).
+   Specific packages belong in the summary box's Skills line, not here.
+
+   Current taxonomy (the sidebar groups categories under these facets):
+   - Language: R, Python, SQL
+   - Problem type: Machine learning, Econometrics, Forecasting, Text analytics, Simulation
+   - Domain: Health, Sport, Public policy, Media
+
+   Reuse an existing category where one fits. If a new one is genuinely needed,
+   add it to the `categoryFacets` object in `index.qmd` (otherwise it lands in an
+   "Other" group), and link it from the Tools section of `about.qmd` if relevant.
+   About-page links use the form `index.qmd#category=Machine%20learning`.
 3. Point `image:` at a thumbnail in `assets/figures/`.
 4. Fill the summary box, then write the body in the fixed section order (see
    the template). Keep the body to roughly 600-900 words.

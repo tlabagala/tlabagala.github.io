@@ -8,10 +8,14 @@ Hi there! My name is Tristan Labagala and I am a final year Bachelor of Commerce
 
 ## Tools
 
-R (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM,
-matplotlib) · SQL · Excel · Quarto · Git · VS Code 
+Linked items open the matching projects in my [portfolio](index.qmd).
+
+- **Languages:** [R](index.qmd#category=R) · [Python](index.qmd#category=Python) · SQL
+- **Methods:** [Machine learning](index.qmd#category=Machine%20learning) · [Econometrics](index.qmd#category=Econometrics) · [Forecasting](index.qmd#category=Forecasting) · [Text analytics](index.qmd#category=Text%20analytics) · [Simulation](index.qmd#category=Simulation) · Data visualisation
+- **Workflow:** Excel · Quarto · Git · VS Code
 
 ## Elsewhere
 
+- [Email](mailto:tristan.labagala@gmail.com)
 - [GitHub](https://github.com/tlabagala)
 - [LinkedIn](https://www.linkedin.com/in/tristan-labagala/)

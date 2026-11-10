@@ -2,7 +2,7 @@
 title: "Can word frequencies alone tell sport from politics?"
 description: "Clustering and network analysis on a hand-built corpus of 20 news articles, in R with tm and igraph."
 date: 2025-05-29
-categories: [R, tm, igraph, text-mining, clustering]
+categories: [R, Text analytics, Machine learning, Media]
 image: "../assets/figures/textmining-document-network.png"
 image-alt: "Network of 20 news documents, coloured by genre, with film articles sitting at the centre."
 ---
