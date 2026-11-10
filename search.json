@@ -116,7 +116,7 @@
     "href": "index.html",
     "title": "My Portfolio",
     "section": "",
-    "text": "This portfolio pulls together analytics and research work from university coursework, personal projects, and student club work. Every write-up follows the same structure - the question I was trying to answer, the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, and the assumptions the analysis rests on. Full code for every project is linked on GitHub, so you can see exactly how each result was produced.\n\n\n\n\n\n\n\n\n\n\nCan a smarter strategy beat drafting off last season’s totals?\n\n\n\nPython\n\npandas\n\nnba_api\n\nStreamlit\n\npytest\n\nbacktesting\n\n\n\nA fantasy NBA draft assistant in Python - player projections, a lineup-aware draft engine and a leakage-free backtest over 13 seasons.\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nICU Mortality Probability Prediction\n\n\n\nR\n\ntidymodels\n\nLightGBM\n\nXGBoost\n\n\n\nFive model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, built for a Kaggle competition.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhat predicts crime across Victoria’s LGAs?\n\n\n\nR\n\npanel-econometrics\n\nfixed-effects\n\nelastic-net\n\nchoropleth\n\n\n\nPanel econometrics on 78 Victorian LGAs, 2011-2024: fixed effects, LASSO and elastic net, as part of a three-person MSAC research team.\n\n\n\nMay 1, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan word frequencies alone tell sport from politics?\n\n\n\nR\n\ntm\n\nigraph\n\ntext-mining\n\nclustering\n\n\n\nClustering and network analysis on a hand-built corpus of 20 news articles, in R with tm and igraph.\n\n\n\nMay 29, 2025\n\n\n\n\n\n\nNo matching items"
+    "text": "This portfolio pulls together analytics and research work from university coursework, personal projects, and student club work. Every write-up follows the same structure - the question I was trying to answer, the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, and the assumptions the analysis rests on. Each write-up links to its full code on GitHub or its full paper, so you can see how the results were produced.\n\n\n\n\n\n\n\n\n\n\nCan a smarter strategy beat drafting off last season’s totals?\n\n\n\nPython\n\nForecasting\n\nSimulation\n\nSport\n\n\n\nA fantasy NBA draft assistant in Python - player projections, a lineup-aware draft engine and a leakage-free backtest over 13 seasons.\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nICU Mortality Probability Prediction\n\n\n\nR\n\nMachine learning\n\nHealth\n\n\n\nFive model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, built for a Kaggle competition.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhat predicts crime across Victoria’s LGAs?\n\n\n\nR\n\nEconometrics\n\nMachine learning\n\nPublic policy\n\n\n\nPanel econometrics on 78 Victorian LGAs, 2011-2024: fixed effects, LASSO and elastic net, as part of a three-person MSAC research team.\n\n\n\nMay 1, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan word frequencies alone tell sport from politics?\n\n\n\nR\n\nText analytics\n\nMachine learning\n\nMedia\n\n\n\nClustering and network analysis on a hand-built corpus of 20 news articles, in R with tm and igraph.\n\n\n\nMay 29, 2025\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",
@@ -130,14 +130,14 @@
     "href": "about.html#tools",
     "title": "About",
     "section": "Tools",
-    "text": "Tools\nR (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL · Excel · Quarto · Git · VS Code"
+    "text": "Tools\nLinked items open the matching projects in my portfolio.\n\nLanguages: R · Python · SQL\nMethods: Machine learning · Econometrics · Forecasting · Text analytics · Simulation · Data visualisation\nWorkflow: Excel · Quarto · Git · VS Code"
   },
   {
     "objectID": "about.html#elsewhere",
     "href": "about.html#elsewhere",
     "title": "About",
     "section": "Elsewhere",
-    "text": "Elsewhere\n\nGitHub\nLinkedIn"
+    "text": "Elsewhere\n\nEmail\nGitHub\nLinkedIn"
   },
   {
     "objectID": "projects/icu-mortality-prediction.html",
