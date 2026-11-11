@@ -1,0 +1,1404 @@
+---
+title: "Forecasting Western Australian specialised food retailing turnover"
+subtitle: "ETC3550 Applied forecasting (Monash University) retail project"
+author: Tristan Labagala
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    embed-resources: true
+    code-fold: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+```{r}
+#| label: get-data
+#| message: false
+library(fpp3)
+# ABS series A3349508C: Western Australia, other specialised food retailing
+retail <- readr::read_rds("https://bit.ly/monashretaildata") |>
+  filter(`Series ID` == "A3349508C")
+```
+
+```{r}
+#| label: setup
+# Labels reused on every plot so units are always shown
+y_lab <- "Turnover ($Million AUD)"
+series_name <- "WA other specialised food retailing"
+```
+
+# Introduction
+
+This report forecasts monthly retail turnover for **`r unique(retail$Industry)`** in **`r unique(retail$State)`** (ABS Series ID **`r unique(retail$"Series ID")`**). The data run from `r format(min(retail$Month))` to `r format(max(retail$Month))` (`r nrow(retail)` months) and are measured in millions of Australian dollars, in current prices and not seasonally adjusted. This ABS industry subgroup covers food retailers other than supermarkets and liquor stores: butchers, fresh fish shops, fruit and vegetable grocers, bakeries, and confectionery and specialty food stores.
+
+The report first explores the series (Sections 1-2), chooses a transformation and decomposes the series (Sections 3-4), and checks stationarity (Section 5). It then short-lists, fits and compares ARIMA and ETS models using the last 24 months as a test set (Sections 6-8), produces a two-year forecast (Section 9), and checks that forecast against the latest ABS data (Section 10).
+
+# 1. Plots of the series
+
+```{r}
+#| label: fig-time-plot
+#| fig-width: 10
+#| fig-height: 5
+# Key episodes, used to tie the explanations to dates on the plot
+events <- tibble(
+  label = c("A", "B", "C", "D", "E", "F", "G"),
+  start = yearmonth(c("1994 Jul", "1999 Oct", "2008 Dec", "2012 Jul", "2016 Jan", "2020 Mar", "2022 Jan")),
+  end   = yearmonth(c("1995 Dec", "2000 Jul", "2009 Dec", "2013 Dec", "2017 Dec", "2021 Dec", "2022 Dec"))
+)
+
+retail |>
+  autoplot(Turnover) +
+  annotate("rect",
+    xmin = events$start, xmax = events$end, ymin = -Inf, ymax = Inf,
+    fill = "steelblue", alpha = 0.15
+  ) +
+  annotate("text",
+    x = events$start + round(as.numeric(events$end - events$start) / 2), y = 150,
+    label = events$label, fontface = "bold", colour = "steelblue4"
+  ) +
+  scale_x_yearmonth(date_breaks = "4 years", date_labels = "%Y") +
+  labs(
+    title = paste("Monthly turnover:", series_name),
+    subtitle = "April 1982 to December 2022; shaded bands A-G are the episodes discussed in the text",
+    x = "Month",
+    y = y_lab
+  )
+```
+
+```{r}
+#| label: time-plot-numbers
+#| echo: false
+annual <- retail |>
+  as_tibble() |>
+  filter(year(Month) >= 1983) |>
+  group_by(Year = year(Month)) |>
+  summarise(Turnover = mean(Turnover))
+first_level <- annual$Turnover[annual$Year == 1983]
+last_level <- annual$Turnover[annual$Year == 2022]
+# How far December sits above the average of the other months, early vs late
+dec_gap <- retail |>
+  as_tibble() |>
+  group_by(Year = year(Month)) |>
+  summarise(gap = Turnover[month(Month) == 12] - mean(Turnover[month(Month) != 12]))
+gap_early <- mean(dec_gap$gap[dec_gap$Year %in% 1983:1989])
+gap_late <- mean(dec_gap$gap[dec_gap$Year %in% 2013:2022])
+```
+
+Turnover grew about `r round(last_level / first_level)`-fold between 1983 and 2022, partly from inflation (the series is in current dollars) and partly from WA's population growth. The growth came in steps that line up with WA events:
+
+- **A (1994-95):** a jump of about 40% in one year, too large for spending alone, so probably partly an ABS reclassification.
+- **B (1999-2000):** a Y2K stockpiling spike, then a lasting fall of about a third around the July 2000 GST, probably partly a measurement break.
+- **C (2008-09):** no GFC slump, as stimulus payments and mining income lifted Christmas spending.
+- **D (2012-13):** a jump at the peak of the mining boom; **E (2016-17):** a fall in WA's post-boom recession.
+- **F (2020-21):** COVID-19 (Section 2); **G (2022):** food price inflation.
+
+```{r}
+#| label: fig-season-plot
+retail |>
+  gg_season(Turnover, labels = "right") +
+  labs(
+    title = paste("Seasonal plot:", series_name),
+    subtitle = "Each line is one year",
+    x = "Month",
+    y = y_lab,
+    colour = "Year"
+  )
+```
+
+Every year dips in February and June and peaks in December with Christmas food shopping. Recent years are much further apart in December, so the peak grows with the level. Only 1999 (October, Y2K) and 2020 (March, panic buying) break the pattern.
+
+```{r}
+#| label: fig-subseries-plot
+#| fig-width: 10
+retail |>
+  gg_subseries(Turnover) +
+  labs(
+    title = paste("Seasonal subseries plot:", series_name),
+    subtitle = "Blue lines show the mean for each calendar month",
+    x = "Year",
+    y = y_lab
+  )
+```
+
+Every month follows the same long-run path, so the episodes above are shifts in the level of the series rather than seasonal events. December has by far the highest mean, so the seasonality is mostly a single Christmas peak.
+
+```{r}
+#| label: fig-acf-raw
+retail |>
+  ACF(Turnover, lag_max = 48) |>
+  autoplot() +
+  labs(
+    title = paste("ACF of turnover:", series_name),
+    subtitle = "Raw (untransformed, undifferenced) series",
+    x = "Lag (months)",
+    y = "Autocorrelation"
+  )
+```
+
+```{r}
+#| label: acf-raw-numbers
+#| echo: false
+acf_raw <- retail |> ACF(Turnover, lag_max = 48)
+r1 <- acf_raw$acf[1]
+r48 <- acf_raw$acf[48]
+```
+
+The autocorrelations start at `r round(r1, 2)` and are still `r round(r48, 2)` at lag 48, the mark of a strong trend that hides the seasonality. The series is clearly non-stationary, so it is differenced in Section 5.
+
+# 2. Statistical features, including COVID-19
+
+```{r}
+#| label: stl-features
+stl_feat <- retail |>
+  features(Turnover, feat_stl) |>
+  select(trend_strength, seasonal_strength_year)
+stl_feat |>
+  knitr::kable(digits = 2, col.names = c("Trend strength", "Seasonal strength"))
+```
+
+Trend strength is `r round(stl_feat$trend_strength, 2)`, so almost all long-run movement is trend. Seasonal strength is only `r round(stl_feat$seasonal_strength_year, 2)`: the December peak is regular, but the irregular jumps are large, so the models will have to cope with a lot of noise.
+
+```{r}
+#| label: fig-level-vs-spread
+level_spread <- retail |>
+  as_tibble() |>
+  group_by(Year = year(Month)) |>
+  filter(n() == 12) |>
+  summarise(Mean = mean(Turnover), SD = sd(Turnover))
+
+level_spread |>
+  ggplot(aes(x = Mean, y = SD)) +
+  geom_point(aes(colour = Year)) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, colour = "grey40", linetype = "dashed") +
+  scale_colour_viridis_c() +
+  labs(
+    title = "Within-year spread of turnover against its level",
+    subtitle = "One point per full calendar year; dashed line is a least-squares fit",
+    x = "Mean monthly turnover in the year ($Million AUD)",
+    y = "Standard deviation of monthly\nturnover in the year ($Million AUD)",
+    colour = "Year"
+  )
+```
+
+Busier years vary more (correlation `r round(cor(level_spread$Mean, level_spread$SD), 2)`), and December's lead over other months grew from \$`r round(gap_early, 1)`M in the 1980s to \$`r round(gap_late, 1)`M in 2013-2022. The variation is a roughly fixed percentage of the level, so a transformation is needed (Section 3).
+
+**Unusual months.** I removed the trend and seasonality from log turnover with a robust STL decomposition and flagged months whose remainder lies more than 3 interquartile ranges below the first quartile or above the third quartile of the remainders:
+
+```{r}
+#| label: outliers
+outlier_reasons <- tribble(
+  ~Month, ~Reason,
+  "1999 Oct", "Y2K stockpiling",
+  "1999 Nov", "Y2K stockpiling",
+  "1999 Dec", "Y2K stockpiling and millennium celebrations",
+  "2000 Jul", "First month of the GST",
+  "2002 May", "No clear cause; likely sampling noise",
+  "2005 Mar", "Labour Day and Easter in the same month cut trading days",
+  "2009 Nov", "No clear cause; possibly late spending from the 2009 stimulus",
+  "2010 Apr", "Temporary Apr-Jun 2010 jump; possibly an ABS sample change",
+  "2010 May", "Temporary Apr-Jun 2010 jump; possibly an ABS sample change",
+  "2010 Jun", "Temporary Apr-Jun 2010 jump; possibly an ABS sample change",
+  "2020 Mar", "COVID-19 panic buying"
+) |>
+  mutate(Month = yearmonth(Month))
+
+outliers <- retail |>
+  model(STL(log(Turnover) ~ season(window = 13), robust = TRUE)) |>
+  components() |>
+  as_tibble() |>
+  filter(
+    remainder < quantile(remainder, 0.25) - 3 * IQR(remainder) |
+      remainder > quantile(remainder, 0.75) + 3 * IQR(remainder)
+  ) |>
+  left_join(retail |> as_tibble() |> select(Month, Turnover), by = "Month") |>
+  left_join(outlier_reasons, by = "Month") |>
+  select(Month, Turnover, remainder, Reason)
+
+outliers |>
+  mutate(Month = format(Month)) |>
+  knitr::kable(
+    digits = c(0, 1, 3, 0),
+    col.names = c("Month", "Turnover ($Million AUD)", "STL remainder (log scale)", "Likely reason")
+  )
+```
+
+
+```{r}
+#| label: fig-covid
+#| fig-width: 10
+#| fig-height: 5
+covid_events <- tibble(
+  Month = yearmonth(c("2020 Mar", "2020 Apr", "2021 Feb", "2022 Mar")),
+  label = c(
+    "Mar 2020: state of emergency,\npanic buying",
+    "Apr 2020: WA hard\nborder closes",
+    "Feb 2021: Perth 5-day\nsnap lockdown",
+    "Mar 2022: border\nreopens"
+  ),
+  y = c(140, 78, 78, 78)
+)
+
+retail |>
+  filter(year(Month) >= 2018) |>
+  autoplot(Turnover) +
+  geom_point(size = 1) +
+  geom_vline(xintercept = covid_events$Month, linetype = "dashed", colour = "firebrick") +
+  geom_label(
+    data = covid_events, aes(x = Month, y = y, label = label),
+    size = 3, hjust = 0, linewidth = 0, alpha = 0.8
+  ) +
+  scale_x_yearmonth(date_breaks = "6 months", date_labels = "%b %Y") +
+  labs(
+    title = paste("Turnover around COVID-19:", series_name),
+    subtitle = "January 2018 to December 2022; dashed lines mark key WA COVID-19 events",
+    x = "Month",
+    y = y_lab
+  )
+```
+
+```{r}
+#| label: covid-numbers
+#| echo: false
+mean_2019 <- annual$Turnover[annual$Year == 2019]
+mean_2020 <- annual$Turnover[annual$Year == 2020]
+feb_2020 <- retail$Turnover[retail$Month == yearmonth("2020 Feb")]
+mar_2020 <- retail$Turnover[retail$Month == yearmonth("2020 Mar")]
+```
+
+**COVID-19.** Turnover jumped `r round(100 * (mar_2020 / feb_2020 - 1))`% in March 2020 as households stockpiled, then settled at a higher level: 2020 averaged `r round(100 * (mean_2020 / mean_2019 - 1))`% above 2019, as cafes closed, the hard border kept spending at home and income support lifted incomes. WA's snap lockdowns lasted only days, so they barely show. For forecasting, the training set ends in December 2020, right after this jump, so the models start from an unusually high level.
+
+# 3. Box-Cox transformation
+
+```{r}
+#| label: guerrero
+lambda_guerrero <- retail |>
+  features(Turnover, features = guerrero) |>
+  pull(lambda_guerrero)
+```
+
+The variation grows with the level (Section 2), but the models assume it does not, so a Box-Cox transformation is needed to even it out. Guerrero's method suggests $\lambda =$ `r round(lambda_guerrero, 2)`, but it is pulled around by the level shifts and unusual months, so I treated it as a starting point and compared it with 0 (log), 0.25, 0.5 and 1 (no change).
+
+```{r}
+#| label: fig-lambda-compare
+#| fig-height: 10
+lambda_grid <- tibble(
+  lambda = c(lambda_guerrero, 0, 0.25, 0.5, 1),
+  name = c(
+    paste0("λ = ", round(lambda_guerrero, 2), " (Guerrero)"),
+    "λ = 0 (log)", "λ = 0.25", "λ = 0.5 (about square root)", "λ = 1 (no transformation)"
+  )
+)
+
+lambda_long <- lambda_grid |>
+  mutate(data = purrr::map(lambda, \(l) retail |> mutate(Transformed = box_cox(Turnover, l)))) |>
+  tidyr::unnest(data) |>
+  mutate(name = factor(name, levels = lambda_grid$name)) |>
+  as_tsibble(index = Month, key = name)
+
+lambda_long |>
+  autoplot(Transformed) +
+  facet_wrap(vars(name), ncol = 1, scales = "free_y") +
+  scale_x_yearmonth(date_breaks = "4 years", date_labels = "%Y") +
+  theme(legend.position = "none") +
+  labs(
+    title = paste0("Box-Cox transformed turnover for several λ values:\n", series_name),
+    subtitle = "Each panel has its own y-axis; untransformed units are $Million AUD",
+    x = "Month",
+    y = "Transformed turnover (Box-Cox scale, no units)"
+  )
+```
+
+```{r}
+#| label: lambda-table
+# Size of the December peak in 2013-2022 relative to 1983-1989 (1 = same size)
+lambda_check <- lambda_grid |>
+  mutate(ratio = purrr::map_dbl(lambda, \(l) {
+    yearly <- retail |>
+      as_tibble() |>
+      mutate(w = box_cox(Turnover, l)) |>
+      group_by(Year = year(Month)) |>
+      filter(n() == 12) |>
+      summarise(dec_gap = w[month(Month) == 12] - mean(w[month(Month) != 12]))
+    mean(yearly$dec_gap[yearly$Year >= 2013]) / mean(yearly$dec_gap[yearly$Year <= 1989])
+  }))
+
+lambda_check |>
+  select(name, ratio) |>
+  knitr::kable(digits = 2, col.names = c("λ", "December peak size: 2013-2022 / 1983-1989"))
+ratio_of <- \(l) lambda_check$ratio[which.min(abs(lambda_check$lambda - l))]
+```
+
+The table checks the plots by comparing the size of the December peak late and early in the series (1 = same size). With $\lambda$ = 1, 0.5 and 0.25 the recent peaks are still `r round(ratio_of(1), 1)`, `r round(ratio_of(0.5), 1)` and `r round(ratio_of(0.25), 1)` times the early ones, so the variation still grows. The log (`r round(ratio_of(0), 2)`) and Guerrero's value (`r round(ratio_of(lambda_guerrero), 2)`) both even it out, missing by similar amounts in opposite directions, and their panels look almost identical.
+
+```{r}
+#| label: lambda-final
+lambda <- 0
+```
+
+**I chose the log ($\lambda = 0$).** It works as well as Guerrero's value without relying on an estimate distorted by unusual months, and it makes the results easy to read as percentages (for example, "December is 20% above trend"). Forecasts are back-transformed to \$Million AUD automatically and are always positive.
+
+# 4. STL decomposition of the transformed data
+
+STL splits log turnover into trend, seasonal and remainder parts. I compared window sizes rather than accepting the defaults, and used robust fitting so the one-off spikes from Section 2 stay in the remainder.
+
+```{r}
+#| label: stl-helper
+fit_stl <- function(trend_window, season_window) {
+  retail |>
+    model(STL(
+      box_cox(Turnover, lambda) ~ trend(window = trend_window) + season(window = season_window),
+      robust = TRUE
+    )) |>
+    components()
+}
+```
+
+```{r}
+#| label: fig-season-window
+#| fig-width: 10
+season_windows <- list("7 years" = 7, "21 years" = 21, "periodic" = "periodic")
+
+season_cmp <- purrr::imap(season_windows, \(sw, nm) fit_stl(13, sw) |> mutate(window = nm))
+
+season_cmp |>
+  purrr::map(as_tibble) |>
+  bind_rows() |>
+  filter(month(Month) %in% c(2, 6, 10, 12)) |>
+  mutate(
+    month = factor(month(Month, label = TRUE, abbr = FALSE), levels = month.name),
+    window = factor(window, levels = names(season_windows)),
+    effect = 100 * (exp(season_year) - 1)
+  ) |>
+  ggplot(aes(x = year(Month), y = effect, colour = window)) +
+  geom_line(linewidth = 0.8) +
+  facet_wrap(vars(month), scales = "free_y", nrow = 1) +
+  labs(
+    title = "Estimated seasonal effect under three seasonal windows",
+    subtitle = "STL on log turnover, trend window = 13 months, robust fitting",
+    x = "Year",
+    y = "Seasonal effect (% above/below trend)",
+    colour = "season(window)"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+**Seasonal window: 21 years.** A 7-year window chases one-off events, for example December jumping to about 25% during the stimulus and boom years, which would make forecasts of next December unreliable. A periodic window forces every December to be the same, yet both flexible fits show the peak growing from about 15% to over 20% above trend. A 21-year window follows that gradual change without reacting to single years, which suits Christmas habits that change over decades.
+
+```{r}
+#| label: fig-trend-window
+#| fig-width: 10
+trend_windows <- c("13 months" = 13, "21 months (default)" = 21, "61 months" = 61)
+
+trend_cmp <- purrr::imap(trend_windows, \(tw, nm) fit_stl(tw, 21) |> mutate(window = nm))
+
+trend_cmp |>
+  purrr::map(as_tibble) |>
+  bind_rows() |>
+  filter(year(Month) >= 1995, year(Month) <= 2015) |>
+  mutate(window = factor(window, levels = names(trend_windows))) |>
+  ggplot(aes(x = Month)) +
+  geom_line(aes(y = `box_cox(Turnover, lambda)`), colour = "grey60") +
+  geom_line(aes(y = trend, colour = window), linewidth = 0.8) +
+  scale_x_yearmonth(date_breaks = "2 years", date_labels = "%Y") +
+  labs(
+    title = "STL trend under three trend windows, 1995-2015",
+    subtitle = "Grey line is log turnover; season window = 21 years, robust fitting",
+    x = "Month",
+    y = "Log of turnover ($Million AUD)",
+    colour = "trend(window)"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+**Trend window: 13 months.** The series moves in steps, which a 61-month trend cuts straight through and the 21-month default lags behind. A 13-month trend follows the 2000 drop and the 2013 jump within a few months. It is also the shortest window that spans a full year, so the trend cannot absorb the seasonal pattern.
+
+```{r}
+#| label: fig-stl-final
+#| fig-height: 8
+stl_final <- fit_stl(trend_window = 13, season_window = 21)
+
+# Built by hand so the panels have readable names instead of column names
+stl_final |>
+  as_tibble() |>
+  select(Month, `Log turnover` = `box_cox(Turnover, lambda)`, Trend = trend, Seasonal = season_year, Remainder = remainder) |>
+  tidyr::pivot_longer(-Month, names_to = "component") |>
+  mutate(component = factor(component, levels = c("Log turnover", "Trend", "Seasonal", "Remainder"))) |>
+  ggplot(aes(x = Month, y = value)) +
+  geom_line() +
+  facet_grid(rows = vars(component), scales = "free_y") +
+  scale_x_yearmonth(date_breaks = "4 years", date_labels = "%Y") +
+  labs(
+    title = paste("STL decomposition of log turnover:", series_name),
+    subtitle = "trend(window = 13), season(window = 21), robust = TRUE",
+    x = "Month",
+    y = "Log of turnover ($Million AUD); components add up to the top panel"
+  )
+```
+
+```{r}
+#| label: stl-numbers
+#| echo: false
+dec_effect <- stl_final |>
+  as_tibble() |>
+  filter(month(Month) == 12) |>
+  mutate(Year = year(Month), effect = 100 * (exp(season_year) - 1))
+dec_early <- mean(dec_effect$effect[dec_effect$Year <= 1989])
+dec_late <- mean(dec_effect$effect[dec_effect$Year >= 2010])
+```
+
+The trend grows at a fairly steady percentage rate apart from the steps in Section 1. The December effect rose from about `r round(dec_early)`% to `r round(dec_late)`% above trend, so the models should let the seasonal pattern evolve. The largest remainders are the months already explained (Y2K, April-June 2010, March 2020), and the remainder is noisier before 2012, which may make the prediction intervals wider than recent data need.
+
+# 5. Differencing and unit-root tests
+
+```{r}
+#| label: train-test
+train <- retail |>
+  filter(Month <= max(Month) - 24)
+```
+
+The last 24 months (`r format(max(train$Month) + 1)` to `r format(max(retail$Month))`) are held back as a test set, so the tests below use the training set. ARIMA needs a stationary series, so I chose the differencing using the KPSS test, whose null hypothesis is that the series is stationary (p < 0.05 means difference again), alongside the ACF.
+
+```{r}
+#| label: acf-pacf-helper
+# ACF and PACF in one labelled, faceted plot
+acf_pacf_plot <- function(.data, var, lag_max = 36, title, subtitle = NULL) {
+  n_obs <- .data |>
+    mutate(.v = {{ var }}) |>
+    pull(.v) |>
+    na.omit() |>
+    length()
+  bind_rows(
+    .data |> ACF({{ var }}, lag_max = lag_max) |> as_tibble() |>
+      transmute(lag = as.numeric(lag), value = acf, type = "ACF"),
+    .data |> PACF({{ var }}, lag_max = lag_max) |> as_tibble() |>
+      transmute(lag = as.numeric(lag), value = pacf, type = "PACF")
+  ) |>
+    ggplot(aes(x = lag, y = value)) +
+    geom_segment(aes(xend = lag, yend = 0)) +
+    geom_hline(yintercept = 0) +
+    geom_hline(yintercept = c(-1, 1) * 1.96 / sqrt(n_obs), linetype = "dashed", colour = "blue") +
+    facet_wrap(vars(type), ncol = 1) +
+    scale_x_continuous(breaks = seq(0, lag_max, by = 6)) +
+    labs(title = title, subtitle = subtitle, x = "Lag (months)", y = "Correlation")
+}
+```
+
+```{r}
+#| label: nsdiffs
+seasonal_test <- train |>
+  features(box_cox(Turnover, lambda), list(unitroot_nsdiffs, feat_stl)) |>
+  select(nsdiffs, seasonal_strength_year)
+seasonal_test |>
+  knitr::kable(digits = 3, col.names = c("nsdiffs", "Seasonal strength (log scale)"))
+```
+
+```{r}
+#| label: fig-acf-first-diff
+#| fig-height: 6
+train |>
+  acf_pacf_plot(
+    difference(box_cox(Turnover, lambda)),
+    title = "ACF and PACF of first-differenced log turnover (training set)",
+    subtitle = "Month-on-month change in log turnover; dashed lines are approximate 95% limits"
+  )
+```
+
+```{r}
+#| label: first-diff-numbers
+#| echo: false
+acf_d1 <- train |> ACF(difference(box_cox(Turnover, lambda)), lag_max = 36)
+seas_spikes <- round(acf_d1$acf[c(12, 24, 36)], 2)
+```
+
+**Seasonal difference (D = 1).** `unitroot_nsdiffs` recommends `r seasonal_test$nsdiffs` seasonal differences only because the seasonal strength (`r round(seasonal_test$seasonal_strength_year, 3)`) is just under its 0.64 cut-off. That is too close to call, and the seasonal spikes in the ACF above do not die away (`r seas_spikes[1]`, `r seas_spikes[2]` and `r seas_spikes[3]` at lags 12, 24 and 36), so I took a seasonal difference anyway.
+
+```{r}
+#| label: kpss-table
+kpss_results <- bind_rows(
+  "log(Turnover)" = train |> features(box_cox(Turnover, lambda), unitroot_kpss),
+  "Seasonally differenced" = train |> features(difference(box_cox(Turnover, lambda), 12), unitroot_kpss),
+  "Seasonally and first differenced" = train |> features(difference(difference(box_cox(Turnover, lambda), 12)), unitroot_kpss),
+  .id = "Series"
+) |>
+  select(Series, kpss_stat, kpss_pvalue)
+
+ndiffs_after_seasonal <- train |>
+  features(difference(box_cox(Turnover, lambda), 12), unitroot_ndiffs) |>
+  pull(ndiffs)
+
+kpss_results |>
+  knitr::kable(digits = 3, col.names = c("Series", "KPSS statistic", "KPSS p-value"))
+```
+
+```{r}
+#| label: fig-acf-seasonal-diff
+#| fig-height: 6
+train |>
+  acf_pacf_plot(
+    difference(box_cox(Turnover, lambda), 12),
+    title = "ACF and PACF of seasonally differenced log turnover (training set)",
+    subtitle = "Change in log turnover from the same month a year earlier"
+  )
+```
+
+```{r}
+#| label: seasonal-diff-numbers
+#| echo: false
+acf_sd <- train |> ACF(difference(box_cox(Turnover, lambda), 12), lag_max = 36)
+acf1_dd <- train |>
+  ACF(difference(difference(box_cox(Turnover, lambda), 12)), lag_max = 1) |>
+  pull(acf)
+```
+
+**First difference (d = 1).** Log turnover fails the KPSS test (p = `r kpss_results$kpss_pvalue[1]` or smaller), and after the seasonal difference it passes (p = `r kpss_results$kpss_pvalue[2]` or larger), with `unitroot_ndiffs` suggesting `r ndiffs_after_seasonal` more differences. However, the ACF of the seasonally differenced series (roughly annual growth) starts at `r round(acf_sd$acf[1], 2)` and decays slowly, so growth drifts away from its average for years at a time. Stopping at d = 0 would assume growth always returns to one fixed rate, which does not fit the distinct growth phases in Section 1, so I also took a first difference. The lag-1 autocorrelation after both differences is only `r round(acf1_dd, 2)` (about -0.5 would signal over-differencing), and because KPSS supported d = 0, one d = 0 model is kept in Section 6 as a check.
+
+```{r}
+#| label: fig-double-diff
+#| fig-height: 6
+train |>
+  acf_pacf_plot(
+    difference(difference(box_cox(Turnover, lambda), 12)),
+    title = "ACF and PACF of seasonally and first differenced log turnover",
+    subtitle = "Training set; dashed lines are approximate 95% limits"
+  )
+```
+
+# 6. Short-listing ARIMA and ETS models
+
+I proposed candidates from the ACF and PACF above and checked them against automatic searches, then fitted all of them to the training set. AICc is only compared between models with the **same differencing** (ARIMA) or on the **same scale** (ETS), because otherwise the likelihoods are computed on different data. **AICc cannot compare ARIMA with ETS**, so those comparisons use test-set accuracy instead.
+
+## ARIMA candidates
+
+The double-differenced ACF and PACF have a spike at lag 1, suggesting an MA(1) term, and a single seasonal ACF spike at lag 12 with decaying seasonal PACF spikes, suggesting a seasonal MA(1). **Constant:** with d + D = 2 no constant is used, because it would make growth accelerate without limit (a quadratic trend). With d + D = 1 a constant (drift) is needed, or the forecasts would stop growing.
+
+```{r}
+#| label: arima-fit
+arima_fit <- train |>
+  model(
+    arima_011_011 = ARIMA(box_cox(Turnover, lambda) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1)),
+    arima_auto_full = ARIMA(box_cox(Turnover, lambda) ~ pdq(d = 1) + PDQ(D = 1),
+      stepwise = FALSE, approximation = FALSE
+    ),
+    arima_100_011_drift = ARIMA(box_cox(Turnover, lambda) ~ 1 + pdq(1, 0, 0) + PDQ(0, 1, 1))
+  )
+```
+
+```{r}
+#| label: arima-table
+arima_glance <- glance(arima_fit) |> select(.model, AICc)
+arima_fc <- arima_fit |> forecast(h = 24)
+arima_acc <- arima_fc |>
+  accuracy(retail) |>
+  select(.model, RMSE, MAE, MAPE, MASE)
+
+arima_summary <- arima_fit |>
+  as_tibble() |>
+  select(-State, -Industry) |>
+  tidyr::pivot_longer(everything(), names_to = ".model", values_to = "fit") |>
+  mutate(
+    Specification = purrr::map_chr(fit, format),
+    Differencing = if_else(.model == "arima_100_011_drift", "d = 0, D = 1", "d = 1, D = 1")
+  ) |>
+  select(.model, Specification, Differencing) |>
+  left_join(arima_glance, by = ".model") |>
+  left_join(arima_acc, by = ".model")
+
+arima_summary |>
+  knitr::kable(digits = 2, caption = "ARIMA candidates: AICc on the log training data; test-set accuracy in $Million AUD (MAPE in %)")
+```
+
+```{r}
+#| label: arima-numbers
+#| echo: false
+aicc_of <- \(tbl, m) tbl$AICc[tbl$.model == m]
+mape_of <- \(m) arima_summary$MAPE[arima_summary$.model == m]
+spec_auto <- arima_summary$Specification[arima_summary$.model == "arima_auto_full"]
+# The default stepwise search, only to report whether it agrees with the exhaustive one
+spec_step <- train |>
+  model(step = ARIMA(box_cox(Turnover, lambda) ~ pdq(d = 1) + PDQ(D = 1))) |>
+  pull(step) |>
+  purrr::map_chr(format)
+```
+
+**Why each was included:**
+
+- **ARIMA(0,1,1)(0,1,1)~12~:** read directly from the lag-1 and lag-12 ACF spikes.
+- **Automatic search with d = 1, D = 1 (`stepwise = FALSE`):** a check on the hand-picked orders. It chose **`r spec_auto`**`r if (spec_auto == spec_step) ", and the default stepwise search chose the same model" else paste0("; the default stepwise search chose ", spec_step)`.
+- **ARIMA(1,0,0)(0,1,1)~12~ with drift:** the d = 0 differencing that KPSS supported, to test my choice of d = 1.
+
+**ARIMA(0,1,1)(0,1,1)~12~** has a much lower AICc than the automatic choice (`r round(aicc_of(arima_summary, "arima_011_011"), 1)` against `r round(aicc_of(arima_summary, "arima_auto_full"), 1)`, same differencing). The search missed it because `fable` rules out a seasonal MA coefficient this close to -1, yet the model is valid and fits better, which is why I used automatic selection only as a check. The d = 0 model cannot be compared on AICc, but it does worse on the test set (MAPE `r round(mape_of("arima_100_011_drift"), 1)`% against `r round(mape_of("arima_011_011"), 1)`%), which supports taking a first difference in Section 5.
+
+**Left out:** ARIMA(1,1,0)(0,1,1)~12~, because the single small lag-1 spike fits an MA(1) or AR(1) almost equally well, so only one version is needed; models without a seasonal difference, such as the fully automatic `ARIMA()`, because Section 5 showed the seasonality needs one; a constant with d = 1, D = 1 (accelerating growth); extra seasonal terms (only one seasonal spike); and larger p or q (the remaining spikes are small and isolated).
+
+## ETS candidates
+
+ETS models are labelled (Error, Trend, Season), with each part None (N), Additive (A), damped (Ad) or Multiplicative (M). All candidates use log turnover, the same scale as ARIMA, where additive seasonality means a December peak that is a fixed percentage of the level.
+
+```{r}
+#| label: ets-fit
+ets_fit <- train |>
+  model(
+    ets_log_AAA = ETS(box_cox(Turnover, lambda) ~ error("A") + trend("A") + season("A")),
+    ets_log_AAdA = ETS(box_cox(Turnover, lambda) ~ error("A") + trend("Ad") + season("A")),
+    ets_log_auto = ETS(box_cox(Turnover, lambda))
+  )
+```
+
+```{r}
+#| label: ets-table
+ets_glance <- glance(ets_fit) |> select(.model, AICc)
+ets_fc <- ets_fit |> forecast(h = 24)
+ets_acc <- ets_fc |>
+  accuracy(retail) |>
+  select(.model, RMSE, MAE, MAPE, MASE)
+
+ets_summary <- ets_fit |>
+  as_tibble() |>
+  select(-State, -Industry) |>
+  tidyr::pivot_longer(everything(), names_to = ".model", values_to = "fit") |>
+  mutate(Specification = purrr::map_chr(fit, format)) |>
+  select(.model, Specification) |>
+  left_join(ets_glance, by = ".model") |>
+  left_join(ets_acc, by = ".model")
+
+ets_summary |>
+  knitr::kable(digits = 2, caption = "ETS candidates: AICc on the log training data; test-set accuracy in $Million AUD (MAPE in %)")
+```
+
+```{r}
+#| label: ets-numbers
+#| echo: false
+ets_val <- \(m, col) ets_summary[[col]][ets_summary$.model == m]
+spec_ets_auto <- ets_val("ets_log_auto", "Specification")
+```
+
+**Why each was included:**
+
+- **ETS(A,A,A):** steady percentage growth, matching the long-run log trend.
+- **ETS(A,Ad,A):** tests whether growth is likely to slow down.
+- **Automatic `ETS()`:** a check on the hand-picked models. It chose **`r spec_ets_auto`**.
+
+The automatic `r spec_ets_auto` has the lowest AICc (`r round(ets_val("ets_log_auto", "AICc"), 1)`), but almost all of that advantage comes from its multiplicative errors, which most likely just soak up the volatile 1995-2013 period. On the test set, **ETS(A,A,A)** is the most accurate (MAPE `r round(ets_val("ets_log_AAA", "MAPE"), 2)`% against `r round(ets_val("ets_log_auto", "MAPE"), 2)`% for the automatic model and `r round(ets_val("ets_log_AAdA", "MAPE"), 2)`% for the damped one), because turnover kept growing rather than slowing down.
+
+**Left out:** a no-trend model, because the series has clear long-run growth; models on raw turnover with multiplicative seasonality, because on the log scale the seasonality is already multiplicative in \$Million AUD; multiplicative seasonality on the log scale (it would double-count the log); multiplicative trends (runaway growth); and non-seasonal models (there is a clear December peak). Benchmarks are not short-listed, but MASE compares each model with a seasonal naive forecast.
+
+## Forecasts from the candidates
+
+```{r}
+#| label: candidate-fc-helpers
+model_labels <- bind_rows(
+  arima_summary |> select(.model, Specification),
+  ets_summary |> select(.model, Specification)
+) |>
+  mutate(Label = case_when(
+    .model == "arima_auto_full" ~ paste(Specification, "(automatic)"),
+    .model == "ets_log_auto" ~ paste(Specification, "(automatic)"),
+    .default = Specification
+  )) |>
+  mutate(Label = factor(Label, levels = Label))
+
+plot_candidate_fc <- function(fc, title) {
+  fc |>
+    left_join(model_labels |> select(.model, Label), by = ".model") |>
+    autoplot(retail |> filter(year(Month) >= 2017), level = c(80, 95)) +
+    geom_vline(xintercept = max(train$Month), linetype = "dashed", colour = "grey40") +
+    facet_wrap(vars(Label), ncol = 1) +
+    scale_x_yearmonth(date_breaks = "1 year", date_labels = "%Y") +
+    # Each panel is already labelled with its model, so the colour legend is redundant
+    guides(colour = "none", fill = "none", fill_ramp = guide_legend(title = "Prediction interval")) +
+    theme(legend.position = "bottom") +
+    labs(
+      title = title,
+      subtitle = "Black line is actual turnover; dashed line marks the end of the training set (December 2020)",
+      x = "Month",
+      y = y_lab
+    )
+}
+```
+
+```{r}
+#| label: fig-arima-candidate-fc
+#| fig-width: 10
+#| fig-height: 8
+plot_candidate_fc(arima_fc, "ARIMA candidates: test-set forecasts with 80% and 95% prediction intervals")
+```
+
+```{r}
+#| label: fig-ets-candidate-fc
+#| fig-width: 10
+#| fig-height: 8
+plot_candidate_fc(ets_fc, "ETS candidates: test-set forecasts with 80% and 95% prediction intervals")
+```
+
+```{r}
+#| label: interval-check
+actual_test <- retail |>
+  as_tibble() |>
+  filter(Month > max(train$Month)) |>
+  select(Month, Actual = Turnover)
+
+fc_check <- bind_rows(as_tibble(arima_fc), as_tibble(ets_fc)) |>
+  mutate(pi80 = hilo(Turnover, 80), pi95 = hilo(Turnover, 95)) |>
+  left_join(actual_test, by = "Month") |>
+  mutate(
+    in80 = Actual >= pi80$lower & Actual <= pi80$upper,
+    in95 = Actual >= pi95$lower & Actual <= pi95$upper,
+    width95 = pi95$upper - pi95$lower
+  )
+
+interval_summary <- fc_check |>
+  group_by(.model) |>
+  summarise(
+    mean_error = mean(Actual - .mean),
+    fc_2021 = mean(.mean[year(Month) == 2021]),
+    fc_2022 = mean(.mean[year(Month) == 2022]),
+    cover80 = 100 * mean(in80),
+    cover95 = 100 * mean(in95),
+    width95 = mean(width95)
+  ) |>
+  left_join(model_labels |> select(.model, Label), by = ".model") |>
+  arrange(match(.model, model_labels$.model))
+
+interval_summary |>
+  select(Label, mean_error, fc_2021, fc_2022, cover80, cover95, width95) |>
+  knitr::kable(
+    digits = 1,
+    col.names = c(
+      "Model", "Mean error (actual - forecast)", "Mean forecast 2021", "Mean forecast 2022",
+      "Actuals inside 80% PI (%)", "Actuals inside 95% PI (%)", "Mean width of 95% PI"
+    ),
+    caption = paste0(
+      "Test-set forecasts in $Million AUD. Actual mean monthly turnover was $",
+      round(mean(actual_test$Actual[year(actual_test$Month) == 2021]), 1), "M in 2021 and $",
+      round(mean(actual_test$Actual[year(actual_test$Month) == 2022]), 1), "M in 2022."
+    )
+  )
+```
+
+```{r}
+#| label: interval-numbers
+#| echo: false
+iv <- \(m, col) interval_summary[[col]][interval_summary$.model == m]
+act_2021 <- mean(actual_test$Actual[year(actual_test$Month) == 2021])
+act_2022 <- mean(actual_test$Actual[year(actual_test$Month) == 2022])
+n_full_cover80 <- sum(interval_summary$cover80 == 100)
+```
+
+**Comparing the forecasts.** ARIMA(0,1,1)(0,1,1)~12~ and ETS(A,A,A) both follow the seasonal shape closely but **over-forecast 2021** (for example, \$`r round(iv("arima_011_011", "fc_2021"), 1)`M against an actual \$`r round(act_2021, 1)`M for ARIMA), because they carry forward the post-COVID level at the end of the training data. The automatic ARIMA climbs far too steeply (\$`r round(iv("arima_auto_full", "fc_2022"), 1)`M in 2022 against \$`r round(act_2022, 1)`M), because its seasonal AR terms repeat the 2020 jump, and the d = 0 model sits above the airline model throughout. The damped ETS model flattens out and misses the 2022 rise (\$`r round(iv("ets_log_AAdA", "fc_2022"), 1)`M). The intervals are cautious: `r n_full_cover80` of `r nrow(interval_summary)` candidates contain every test month in their 80% interval, when about 80% would be expected, because the variance is estimated from the volatile training years.
+
+**Preferred forecast: ETS(A,A,A) on log turnover.** It is the most accurate, has a small bias (\$`r round(abs(iv("ets_log_AAA", "mean_error")), 1)`M a month) and has among the narrowest intervals while still containing every actual value. **ARIMA(0,1,1)(0,1,1)~12~** is the best ARIMA forecast, with the lowest AICc and the best test accuracy of its group. These two models are carried forward, and because both are on the log scale they can be compared directly in Section 8.
+
+```{r}
+#| label: chosen-models
+#| echo: false
+chosen_arima <- arima_summary |> filter(.model == "arima_011_011")
+chosen_ets <- ets_summary |> filter(.model == "ets_log_AAA")
+```
+
+# 7. The chosen ARIMA and ETS models
+
+```{r}
+#| label: chosen-fits
+fit_arima <- arima_fit |> select(State, Industry, arima_011_011)
+fit_ets <- ets_fit |> select(State, Industry, ets_log_AAA)
+```
+
+```{r}
+#| label: resid-helpers
+# Small numbers in the text, without scientific notation
+num <- \(x) format(signif(x, 2), scientific = FALSE)
+
+# Time plot, ACF and histogram of the innovation residuals, each with its own labels
+resid_plots <- function(fit, model_name) {
+  res <- augment(fit)
+  list(
+    res |>
+      autoplot(.innov) +
+      geom_point(size = 0.5) +
+      scale_x_yearmonth(date_breaks = "4 years", date_labels = "%Y") +
+      labs(
+        title = paste("Innovation residuals:", model_name),
+        subtitle = "Log scale, so a residual of 0.1 is roughly a 10% forecast error",
+        x = "Month",
+        y = "Residual (log turnover)"
+      ),
+    res |>
+      ACF(.innov, lag_max = 36) |>
+      autoplot() +
+      labs(title = "ACF of residuals", subtitle = model_name, x = "Lag (months)", y = "Autocorrelation"),
+    res |>
+      ggplot(aes(x = .innov)) +
+      geom_histogram(aes(y = after_stat(density)), bins = 40, fill = "grey60") +
+      stat_function(
+        fun = dnorm, colour = "firebrick",
+        args = list(mean = mean(res$.innov, na.rm = TRUE), sd = sd(res$.innov, na.rm = TRUE))
+      ) +
+      labs(
+        title = "Histogram of residuals",
+        subtitle = paste0(model_name, "; red curve is a normal distribution with the same mean and SD"),
+        x = "Residual (log turnover)",
+        y = "Density"
+      )
+  )
+}
+
+resid_summary <- function(fit) {
+  res <- augment(fit) |> as_tibble()
+  z <- (res$.innov - mean(res$.innov)) / sd(res$.innov)
+  tibble(
+    mean = mean(res$.innov),
+    sd = sd(res$.innov),
+    kurtosis = mean(z^4),
+    sd_before_2012 = sd(res$.innov[year(res$Month) < 2012]),
+    sd_from_2012 = sd(res$.innov[year(res$Month) >= 2012])
+  )
+}
+```
+
+## ARIMA(0,1,1)(0,1,1)~12~ on log turnover
+
+### Parameter estimates
+
+```{r}
+#| label: arima-report
+report(fit_arima)
+```
+
+```{r}
+#| label: arima-par-numbers
+#| echo: false
+arima_par <- tidy(fit_arima) |> select(term, estimate) |> tibble::deframe()
+theta1 <- arima_par[["ma1"]]
+Theta1 <- arima_par[["sma1"]]
+sigma2_arima <- glance(fit_arima)$sigma2
+k_arima <- nrow(tidy(fit_arima))
+```
+
+The two coefficients say how much of each forecast error (a "surprise") the model keeps:
+
+- **Non-seasonal MA, $\theta_1 =$ `r round(theta1, 3)`.** About `r round(100 * (1 + theta1))`% of an unexpected change in turnover is treated as a lasting change in level, and the remaining `r round(-100 * theta1)`% is expected to reverse the next month.
+- **Seasonal MA, $\Theta_1 =$ `r round(Theta1, 3)`.** Only about `r round(100 * (1 + Theta1))`% of a surprise in a given month (say an unusually strong December) carries into that month next year. The seasonal pattern therefore changes very slowly, matching the gradual change found with the 21-year STL window.
+- Both are at least `r round(min(abs(tidy(fit_arima)$statistic)), 1)` standard errors from zero, so both are needed. A typical one-month-ahead error is about `r round(100 * sqrt(sigma2_arima), 1)`%.
+
+For the forecasts to be reliable, the residuals should be uncorrelated with mean zero, and for the intervals they should also be roughly normal with constant variance.
+
+### Residual diagnostics
+
+```{r}
+#| label: fig-arima-resid
+#| layout: [[1], [1, 1]]
+#| fig-height: 4
+resid_plots(fit_arima, "ARIMA(0,1,1)(0,1,1)[12]") |> purrr::walk(print)
+```
+
+```{r}
+#| label: arima-ljung-box
+lb_arima <- augment(fit_arima) |>
+  features(.innov, ljung_box, lag = 24, dof = k_arima)
+lb_arima |>
+  select(.model, lb_stat, lb_pvalue) |>
+  knitr::kable(digits = 3, col.names = c("Model", "Ljung-Box statistic", "p-value"))
+```
+
+```{r}
+#| label: big-residuals
+residual_reasons <- tribble(
+  ~Month, ~Reason,
+  "1995 Jan", "Start of the mid-1990s step up in level (episode A)",
+  "1999 Oct", "Y2K stockpiling",
+  "2000 Jan", "Fall back after the Y2K and millennium stockpiling",
+  "2000 Apr", "Start of the 2000 collapse in the lead-up to the GST",
+  "2010 Jan", "Fall back after the unusually strong spending of late 2009",
+  "2010 Jul", "End of the temporary April-June 2010 jump (possibly an ABS sample change)",
+  "2012 Oct", "Start of the 2013 step up at the peak of the mining boom (episode D)",
+  "2020 Mar", "COVID-19 panic buying"
+) |>
+  mutate(Month = yearmonth(Month))
+
+big_resid <- bind_rows(
+  augment(fit_arima) |> as_tibble() |> mutate(model = "ARIMA"),
+  augment(fit_ets) |> as_tibble() |> mutate(model = "ETS")
+) |>
+  select(model, Month, .innov) |>
+  tidyr::pivot_wider(names_from = model, values_from = .innov) |>
+  slice_max(abs(ARIMA), n = 8) |>
+  left_join(residual_reasons, by = "Month")
+
+big_resid |>
+  mutate(Month = format(Month)) |>
+  knitr::kable(
+    digits = 3,
+    col.names = c("Month", "ARIMA residual", "ETS residual", "Likely reason"),
+    caption = "The eight largest ARIMA residuals (log scale), with the ETS residual for the same month"
+  )
+```
+
+```{r}
+#| label: arima-resid-numbers
+#| echo: false
+rs_arima <- resid_summary(fit_arima)
+acf_arima <- augment(fit_arima) |> ACF(.innov, lag_max = 36)
+sig_lags_arima <- acf_arima |>
+  filter(abs(acf) > 1.96 / sqrt(nrow(train))) |>
+  pull(lag) |>
+  as.numeric()
+```
+
+- **Time plot.** The residuals sit around zero (mean `r num(rs_arima$mean)`) with no trend. Every large spike in the table above is a month already explained in Sections 1-2, which no model could predict from past turnover.
+- **ACF.** Only `r length(sig_lags_arima)` of 36 lags (lag `r paste(sig_lags_arima, collapse = ", ")`) just crosses the limits, which is expected by chance, and nothing is left at lag 1 or the seasonal lags.
+- **Ljung-Box test.** This checks the first 24 autocorrelations together (two years of monthly lags), with `r k_arima` degrees of freedom removed for the two estimated MA coefficients (p + q + P + Q). The p-value is `r round(lb_arima$lb_pvalue, 3)`, well above 0.05, so there is no evidence of remaining autocorrelation: **the residuals are consistent with white noise.**
+- **Histogram.** Centred on zero but with long tails (kurtosis `r round(rs_arima$kurtosis, 1)`, against 3 for a normal distribution), caused by the one-off months.
+
+**What this means.** The point forecasts use all the predictable pattern in past turnover. The long tails inflate the estimated spread, so the intervals will be *too wide* for ordinary months, but they may still be too narrow for rare shocks like COVID-19.
+
+### Test-set forecasts
+
+```{r}
+#| label: fig-arima-test-fc
+#| fig-width: 10
+#| fig-height: 4.5
+arima_fc |>
+  filter(.model == "arima_011_011") |>
+  plot_candidate_fc("ARIMA(0,1,1)(0,1,1)[12]: test-set forecasts with 80% and 95% prediction intervals")
+```
+
+The forecasts match the seasonal shape closely but **over-forecast 2021** (\$`r round(iv("arima_011_011", "fc_2021"), 1)`M against \$`r round(act_2021, 1)`M on average), because the model carries forward the post-COVID level while turnover eased back. By 2022, food-price inflation had brought turnover back up to the forecast path, and all 24 actual values lie inside the 80% intervals.
+
+## ETS(A,A,A) on log turnover
+
+### Parameter estimates
+
+```{r}
+#| label: ets-report
+report(fit_ets)
+```
+
+```{r}
+#| label: ets-par-numbers
+#| echo: false
+ets_par <- tidy(fit_ets) |> select(term, estimate) |> tibble::deframe()
+ets_cmp <- components(fit_ets) |> as_tibble()
+ets_dec <- ets_cmp |> filter(month(Month) == 12)
+dec_first <- first(ets_dec$season)
+dec_last <- last(ets_dec$season)
+slope_last <- last(ets_cmp$slope)
+sigma2_ets <- glance(fit_ets)$sigma2
+```
+
+The three smoothing parameters say how quickly the level, growth rate and seasonal pattern react to surprises (0 = never, 1 = fully):
+
+- **$\alpha =$ `r round(ets_par[["alpha"]], 3)` (level).** About `r round(100 * ets_par[["alpha"]])`% of each surprise is absorbed into the level straight away. This suits a series that moves in sudden steps.
+- **$\beta =$ `r num(ets_par[["beta"]])` (growth rate).** Essentially zero, so the model assumes a fixed long-run growth rate of about `r round(100 * (exp(12 * slope_last) - 1), 1)`% a year, and booms and slumps move the level instead.
+- **$\gamma =$ `r round(ets_par[["gamma"]], 3)` (seasonality).** The seasonal pattern evolves slowly, with December rising from about `r round(100 * (exp(dec_first) - 1))`% to `r round(100 * (exp(dec_last) - 1))`% above the level, as STL found.
+
+A typical one-month-ahead error is about `r round(100 * sqrt(sigma2_ets), 1)`%, almost the same as ARIMA. The residual assumptions are also the same.
+
+### Residual diagnostics
+
+```{r}
+#| label: fig-ets-resid
+#| layout: [[1], [1, 1]]
+#| fig-height: 4
+resid_plots(fit_ets, "ETS(A,A,A) on log turnover") |> purrr::walk(print)
+```
+
+```{r}
+#| label: ets-ljung-box
+k_ets <- 3 # alpha, beta and gamma, used only as a sensitivity check
+lb_ets <- bind_rows(
+  augment(fit_ets) |> features(.innov, ljung_box, lag = 24, dof = 0) |> mutate(dof = 0),
+  augment(fit_ets) |> features(.innov, ljung_box, lag = 24, dof = k_ets) |> mutate(dof = k_ets)
+)
+lb_ets |>
+  select(.model, dof, lb_stat, lb_pvalue) |>
+  knitr::kable(digits = 3, col.names = c("Model", "Degrees of freedom removed", "Ljung-Box statistic", "p-value"))
+```
+
+```{r}
+#| label: ets-resid-numbers
+#| echo: false
+rs_ets <- resid_summary(fit_ets)
+acf_ets <- augment(fit_ets) |> ACF(.innov, lag_max = 36)
+sig_ets <- acf_ets |> filter(abs(acf) > 1.96 / sqrt(nrow(train)))
+sig_lags_ets <- as.numeric(sig_ets$lag)
+acf1_ets <- acf_ets$acf[1]
+acf1_arima <- acf_arima$acf[1]
+```
+
+- **Time plot and histogram.** The same as ARIMA: centred on zero (mean `r num(rs_ets$mean)`), with spikes at the same explained months and long tails (kurtosis `r round(rs_ets$kurtosis, 1)`).
+- **ACF.** Unlike ARIMA, there is a **lag-1 autocorrelation of `r round(acf1_ets, 2)`** (`r round(acf1_arima, 2)` for ARIMA), so a month above forecast tends to be followed by another. ETS(A,A,A) has no term for this, whereas the ARIMA MA(1) term captures it.
+- **Ljung-Box test.** I used 24 lags and, following the textbook convention for ETS, removed no degrees of freedom, giving p = `r round(lb_ets$lb_pvalue[lb_ets$dof == 0], 3)`, only just above 0.05. Removing 3 for the smoothing parameters gives p = `r round(lb_ets$lb_pvalue[lb_ets$dof == k_ets], 3)`, so the residuals are **borderline white noise**.
+
+**What this means.** The leftover correlation is small (about `r round(100 * acf1_ets^2, 1)`% of the residual variance), so it barely affects forecasts beyond a month or two, but ETS leaves a little short-term information unused. As with ARIMA, the intervals are likely too wide for ordinary months.
+
+### Test-set forecasts
+
+```{r}
+#| label: fig-ets-test-fc
+#| fig-width: 10
+#| fig-height: 4.5
+ets_fc |>
+  filter(.model == "ets_log_AAA") |>
+  plot_candidate_fc("ETS(A,A,A) on log turnover: test-set forecasts with 80% and 95% prediction intervals")
+```
+
+Like ARIMA, the ETS forecasts match the seasonal shape and over-forecast 2021 (\$`r round(iv("ets_log_AAA", "fc_2021"), 1)`M against \$`r round(act_2021, 1)`M). Its fixed growth rate rises more slowly than ARIMA's, which helps in 2021 but leaves it slightly low in late 2022 (\$`r round(iv("ets_log_AAA", "fc_2022"), 1)`M against \$`r round(act_2022, 1)`M). All 24 actual values lie inside the 80% intervals.
+
+# 8. Comparing the two models on the test set
+
+AICc cannot compare ARIMA with ETS, so the two models are compared on the 24 test months.
+
+```{r}
+#| label: test-compare
+chosen_ids <- c("arima_011_011", "ets_log_AAA")
+
+test_compare <- bind_rows(arima_acc, ets_acc) |>
+  filter(.model %in% chosen_ids) |>
+  left_join(interval_summary |> select(.model, Label, mean_error, cover80, cover95, width95), by = ".model")
+
+test_compare |>
+  select(Label, RMSE, MAE, MAPE, MASE, mean_error, cover80, cover95, width95) |>
+  knitr::kable(
+    digits = 2,
+    col.names = c(
+      "Model", "RMSE", "MAE", "MAPE (%)", "MASE", "Mean error (actual - forecast)",
+      "Actuals inside 80% PI (%)", "Actuals inside 95% PI (%)", "Mean width of 95% PI"
+    ),
+    caption = "Test-set accuracy, January 2021 to December 2022 ($Million AUD unless stated)"
+  )
+
+rmse_by_year <- fc_check |>
+  filter(.model %in% chosen_ids) |>
+  group_by(.model, Year = year(Month)) |>
+  summarise(RMSE = sqrt(mean((Actual - .mean)^2)), ME = mean(Actual - .mean), .groups = "drop") |>
+  left_join(model_labels |> select(.model, Label), by = ".model")
+
+rmse_by_year |>
+  select(Label, Year, RMSE, ME) |>
+  knitr::kable(
+    digits = 2,
+    col.names = c("Model", "Year", "RMSE ($Million AUD)", "Mean error (actual - forecast)"),
+    caption = "Test-set accuracy by year"
+  )
+```
+
+```{r}
+#| label: fig-test-compare
+#| fig-width: 10
+#| fig-height: 5
+fc_check |>
+  filter(.model %in% chosen_ids) |>
+  left_join(model_labels |> select(.model, Label), by = ".model") |>
+  mutate(lower = pi80$lower, upper = pi80$upper) |>
+  ggplot(aes(x = Month)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper, fill = Label), alpha = 0.2) +
+  geom_line(aes(y = .mean, colour = Label), linewidth = 0.8) +
+  geom_line(data = retail |> filter(year(Month) >= 2019), aes(y = Turnover), colour = "black") +
+  geom_vline(xintercept = max(train$Month), linetype = "dashed", colour = "grey40") +
+  scale_x_yearmonth(date_breaks = "6 months", date_labels = "%b %Y") +
+  theme(legend.position = "bottom") +
+  labs(
+    title = "Test-set forecasts from the chosen ARIMA and ETS models",
+    subtitle = "Lines are point forecasts, shaded bands are 80% prediction intervals, black line is actual turnover",
+    x = "Month",
+    y = y_lab,
+    colour = "Model",
+    fill = "Model"
+  )
+```
+
+```{r}
+#| label: test-compare-numbers
+#| echo: false
+tc <- \(m, col) test_compare[[col]][test_compare$.model == m]
+ry <- \(m, yr, col) rmse_by_year[[col]][rmse_by_year$.model == m & rmse_by_year$Year == yr]
+rmse_gain <- 100 * (1 - tc("ets_log_AAA", "RMSE") / tc("arima_011_011", "RMSE"))
+```
+
+**Comparing the forecasts.** Both reproduce the seasonal pattern and over-forecast 2021. ARIMA grows slightly faster, which costs it in 2021 (RMSE `r round(ry("arima_011_011", 2021, "RMSE"), 2)` against `r round(ry("ets_log_AAA", 2021, "RMSE"), 2)`) but helps in 2022 (`r round(ry("arima_011_011", 2022, "RMSE"), 2)` against `r round(ry("ets_log_AAA", 2022, "RMSE"), 2)`). The ETS intervals are narrower (mean 95% width \$`r round(tc("ets_log_AAA", "width95"), 1)`M against \$`r round(tc("arima_011_011", "width95"), 1)`M) because its growth rate is almost fixed, and both contain every actual value.
+
+**I prefer ETS(A,A,A).** It is better on every accuracy measure (RMSE `r round(tc("ets_log_AAA", "RMSE"), 2)` against `r round(tc("arima_011_011", "RMSE"), 2)`, MAPE `r round(tc("ets_log_AAA", "MAPE"), 2)`% against `r round(tc("arima_011_011", "MAPE"), 2)`%), less biased, and has sharper intervals with the same coverage. The margin is modest, though: it comes from only 24 months distorted by COVID-19, and ARIMA has the cleaner residuals, so both models are carried forward to Sections 9 and 10.
+
+# 9. Forecasting two years ahead from the full data
+
+## Refitting on all the data
+
+To forecast beyond the end of the data, both models are re-estimated on the full series (April 1982 to December 2022), now including the two test years. The **model structures are fixed** exactly as chosen in Sections 6-8: the ARIMA orders are written into the formula with `0 +` (no constant), and the ETS components are fixed as (A,A,A), so no automatic selection is re-run. Only the parameters are re-estimated.
+
+```{r}
+#| label: full-fit
+fit_full <- retail |>
+  model(
+    arima = ARIMA(box_cox(Turnover, lambda) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1)),
+    ets = ETS(box_cox(Turnover, lambda) ~ error("A") + trend("A") + season("A"))
+  )
+
+full_labels <- c(arima = "ARIMA(0,1,1)(0,1,1)[12]", ets = "ETS(A,A,A)")
+
+param_compare <- bind_rows(
+  tidy(fit_arima) |> mutate(Model = "ARIMA"),
+  tidy(fit_ets) |> mutate(Model = "ETS")
+) |>
+  filter(term %in% c("ma1", "sma1", "alpha", "beta", "gamma")) |>
+  select(Model, term, Training = estimate) |>
+  left_join(
+    tidy(fit_full) |> transmute(Model = toupper(.model), term, `Full data` = estimate),
+    by = c("Model", "term")
+  )
+
+param_compare |>
+  knitr::kable(
+    digits = 4,
+    col.names = c("Model", "Parameter", "Training set (to Dec 2020)", "Full data (to Dec 2022)"),
+    caption = "Parameter estimates before and after adding the 2021-2022 data"
+  )
+```
+
+```{r}
+#| label: full-par-numbers
+#| echo: false
+pc <- \(m, p, col) param_compare[[col]][param_compare$Model == m & param_compare$term == p]
+full_ets_cmp <- components(fit_full |> select(State, Industry, ets)) |> as_tibble()
+slope_full <- last(full_ets_cmp$slope)
+```
+
+The **ARIMA estimates barely change** ($\theta_1$ from `r round(pc("ARIMA", "ma1", "Training"), 3)` to `r round(pc("ARIMA", "ma1", "Full data"), 3)`, $\Theta_1$ from `r round(pc("ARIMA", "sma1", "Training"), 3)` to `r round(pc("ARIMA", "sma1", "Full data"), 3)`), so it is essentially the same model with two more years of data. The two MA terms describe how much of each surprise carries over to the next month and to the same month next year, and the 2021-2022 data followed much the same pattern as the `r nrow(train)` training months. Adding 24 months that behave like the rest of the series therefore barely moves the estimates.
+
+The **ETS estimates change noticeably**, even though the structure is the same:
+
+- $\beta$ rises from about `r num(pc("ETS", "beta", "Training"))` to `r num(pc("ETS", "beta", "Full data"))`. The growth rate is no longer fixed: it now adapts to recent data, so the strong 2021-2022 growth lifts the growth rate used for forecasting to about `r round(100 * (exp(12 * slope_full) - 1), 1)`% a year (from `r round(100 * (exp(12 * slope_last) - 1), 1)`% in the training fit).
+- $\gamma$ falls to almost zero (`r num(pc("ETS", "gamma", "Full data"))`), so the seasonal pattern is now held almost fixed at its recent shape.
+- $\alpha$ rises from `r round(pc("ETS", "alpha", "Training"), 3)` to `r round(pc("ETS", "alpha", "Full data"), 3)`, so the level follows the latest data even more closely.
+
+This shows ETS parameter estimates can be sensitive to a few unusual years at the end of the sample. The 2021-2022 period combined a post-COVID level shift with rapid food-price inflation, and fitting it pushed the model towards a more adaptive trend.
+
+## Forecasts for 2023-2024
+
+```{r}
+#| label: full-forecast
+fc_full <- fit_full |> forecast(h = 24)
+
+fc_full_table <- fc_full |>
+  hilo(level = 80) |>
+  unpack_hilo(`80%`) |>
+  as_tibble() |>
+  select(.model, Month, .mean, lower = `80%_lower`, upper = `80%_upper`) |>
+  tidyr::pivot_wider(names_from = .model, values_from = c(.mean, lower, upper))
+
+fc_full_table |>
+  mutate(Month = format(Month)) |>
+  select(Month, .mean_arima, lower_arima, upper_arima, .mean_ets, lower_ets, upper_ets) |>
+  knitr::kable(
+    digits = 1,
+    col.names = c(
+      "Month", "ARIMA forecast", "ARIMA 80% lower", "ARIMA 80% upper",
+      "ETS forecast", "ETS 80% lower", "ETS 80% upper"
+    ),
+    caption = "Point forecasts and 80% prediction intervals, $Million AUD"
+  )
+```
+
+```{r}
+#| label: fig-full-forecast
+#| fig-width: 10
+#| fig-height: 7
+fc_full |>
+  mutate(Model = factor(full_labels[.model], levels = full_labels)) |>
+  autoplot(retail |> filter(year(Month) >= 2015), level = 80) +
+  facet_wrap(vars(Model), ncol = 1) +
+  scale_x_yearmonth(date_breaks = "1 year", date_labels = "%Y") +
+  guides(colour = "none", fill = "none", fill_ramp = guide_legend(title = "Prediction interval")) +
+  theme(legend.position = "bottom") +
+  labs(
+    title = paste("Two-year forecasts with 80% prediction intervals:", series_name),
+    subtitle = "Both models refitted on April 1982 to December 2022; black line is actual turnover",
+    x = "Month",
+    y = y_lab
+  )
+```
+
+```{r}
+#| label: full-fc-numbers
+#| echo: false
+fc_year <- fc_full |>
+  as_tibble() |>
+  group_by(.model, Year = year(Month)) |>
+  summarise(mean = mean(.mean), .groups = "drop")
+fy <- \(m, yr) fc_year$mean[fc_year$.model == m & fc_year$Year == yr]
+dec24 <- fc_full_table |> filter(Month == yearmonth("2024 Dec"))
+width_dec24 <- \(m) dec24[[paste0("upper_", m)]] - dec24[[paste0("lower_", m)]]
+```
+
+**Comparing the two forecasts.**
+
+- **2023: almost identical.** Both models forecast average monthly turnover of about \$`r round(fy("arima", 2023))`M-\$`r round(fy("ets", 2023))`M in 2023, up from \$`r round(last_level, 1)`M in 2022, with a December 2023 peak of about \$`r round(fc_full_table$.mean_arima[fc_full_table$Month == yearmonth("2023 Dec")])`M-\$`r round(fc_full_table$.mean_ets[fc_full_table$Month == yearmonth("2023 Dec")])`M. In the first year both forecasts are driven mainly by the latest level and the seasonal pattern, which the two models estimate very similarly.
+- **2024: ETS grows faster.** The ETS forecasts average \$`r round(fy("ets", 2024))`M in 2024 against \$`r round(fy("arima", 2024))`M for ARIMA. The refitted ETS model's growth rate now follows the strong recent growth, while the ARIMA model's growth is a slowly updated long-run average (its seasonal MA coefficient near -1 means each year's change has only a small effect on the expected change next year).
+- **Uncertainty: the ETS intervals are much wider by the end.** By December 2024 the ETS 80% interval is \$`r round(width_dec24("ets"))`M wide against \$`r round(width_dec24("arima"))`M for ARIMA. The ETS growth rate can now move ($\beta > 0$), so uncertainty about growth compounds with the horizon. Both sets of intervals widen with the horizon and are wider at the December peak, because on the log scale the uncertainty is a percentage of the level.
+
+**Preferred forecast.** On the test-set evidence of Section 8, I prefer the **ETS(A,A,A)** forecast for the point forecasts. However, its 2024 forecasts depend heavily on the higher growth rate learned from 2021-2022, which may not continue if food inflation eases, and its wide intervals reflect that. The ARIMA forecast is a sensible, more conservative alternative. All point forecasts are bias-adjusted means on the \$Million AUD scale (Section 11). Section 10 checks how both actually performed.
+
+# 10. Comparing the forecasts with up-to-date ABS data
+
+## The new data
+
+The latest data come from ABS *Retail Trade, Australia*, Table 11 (cat. 8501.0, Retail Turnover, State by Industry Subgroup, Original). The ABS ceased this publication after the **June 2025** release, so that is the most recent version available. 
+
+```{r}
+#| label: abs-data
+abs_path <- "data/8501011.xlsx"
+if (!file.exists(abs_path)) {
+  abs_path <- tempfile(fileext = ".xlsx")
+  download.file(
+    "https://www.abs.gov.au/statistics/industry/retail-and-wholesale-trade/retail-trade-australia/jun-2025/8501011.xlsx",
+    abs_path,
+    mode = "wb", quiet = TRUE
+  )
+}
+
+series_id <- unique(retail$`Series ID`)
+abs_data <- readxl::read_excel(abs_path, sheet = "Data1", skip = 9) |>
+  select(Month = `Series ID`, Turnover = all_of(series_id)) |>
+  mutate(
+    Month = yearmonth(Month),
+    State = unique(retail$State),
+    Industry = unique(retail$Industry)
+  ) |>
+  as_tsibble(index = Month, key = c(State, Industry))
+
+# Check whether the ABS has revised the months we modelled
+revision_check <- abs_data |>
+  as_tibble() |>
+  inner_join(retail |> as_tibble() |> select(Month, Old = Turnover), by = "Month") |>
+  summarise(months = n(), max_abs_revision = max(abs(Turnover - Old)))
+
+abs_new <- abs_data |> filter(Month > max(retail$Month))
+```
+
+```{r}
+#| label: abs-numbers
+#| echo: false
+fc_end <- max(fc_full$Month)
+abs_horizon <- abs_new |> filter(Month <= fc_end)
+```
+
+Series `r series_id` in the ABS file runs to `r format(max(abs_data$Month))`, giving `r nrow(abs_new)` new months after the end of our data. The forecasts cover `r nrow(abs_horizon)` of them (`r format(min(abs_horizon$Month))` to `r format(fc_end)`), so accuracy is measured on those months; the later months are shown on the plot for context only. `r if (revision_check$max_abs_revision < 0.005) paste("The ABS file is identical to the course data in all", revision_check$months, "overlapping months, so no historical revisions affect the comparison.") else paste0("The ABS has revised some earlier months (largest change $", round(revision_check$max_abs_revision, 2), "M); only the new months are used below, so the revisions do not affect the comparison.")`
+
+## How well did the forecasts do?
+
+```{r}
+#| label: fig-abs-compare
+#| fig-width: 10
+#| fig-height: 7
+fc_full |>
+  mutate(Model = factor(full_labels[.model], levels = full_labels)) |>
+  autoplot(abs_data |> filter(year(Month) >= 2019), level = c(80, 95)) +
+  geom_vline(xintercept = max(retail$Month), linetype = "dashed", colour = "grey40") +
+  facet_wrap(vars(Model), ncol = 1) +
+  scale_x_yearmonth(date_breaks = "1 year", date_labels = "%Y") +
+  guides(colour = "none", fill = "none", fill_ramp = guide_legend(title = "Prediction interval")) +
+  theme(legend.position = "bottom") +
+  labs(
+    title = paste("Forecasts against the latest ABS data:", series_name),
+    subtitle = paste0(
+      "Black line is actual turnover from the ABS (to ", format(max(abs_data$Month)),
+      "); dashed line marks the end of the data used for fitting"
+    ),
+    x = "Month",
+    y = y_lab
+  )
+```
+
+```{r}
+#| label: abs-accuracy
+abs_acc <- fc_full |>
+  accuracy(abs_data) |>
+  select(.model, ME, RMSE, MAE, MAPE, MASE)
+
+abs_check <- fc_full |>
+  mutate(pi80 = hilo(Turnover, 80), pi95 = hilo(Turnover, 95)) |>
+  as_tibble() |>
+  inner_join(abs_horizon |> as_tibble() |> select(Month, Actual = Turnover), by = "Month") |>
+  group_by(.model) |>
+  summarise(
+    cover80 = 100 * mean(Actual >= pi80$lower & Actual <= pi80$upper),
+    cover95 = 100 * mean(Actual >= pi95$lower & Actual <= pi95$upper),
+    fc_2023 = mean(.mean[year(Month) == 2023]),
+    fc_2024 = mean(.mean[year(Month) == 2024])
+  )
+
+abs_summary <- abs_acc |>
+  left_join(abs_check, by = ".model") |>
+  mutate(Model = full_labels[.model])
+
+abs_summary |>
+  select(Model, ME, RMSE, MAE, MAPE, MASE, cover80, cover95, fc_2023, fc_2024) |>
+  knitr::kable(
+    digits = 2,
+    col.names = c(
+      "Model", "Mean error (actual - forecast)", "RMSE", "MAE", "MAPE (%)", "MASE",
+      "Actuals inside 80% PI (%)", "Actuals inside 95% PI (%)", "Mean forecast 2023", "Mean forecast 2024"
+    ),
+    caption = paste0(
+      "Forecast accuracy on ", format(min(abs_horizon$Month)), " to ", format(fc_end),
+      " ($Million AUD unless stated). Actual mean monthly turnover was $",
+      round(mean(abs_horizon$Turnover[year(abs_horizon$Month) == 2023]), 1), "M in 2023 and $",
+      round(mean(abs_horizon$Turnover[year(abs_horizon$Month) == 2024]), 1), "M in 2024."
+    )
+  )
+```
+
+```{r}
+#| label: abs-result-numbers
+#| echo: false
+ab <- \(m, col) abs_summary[[col]][abs_summary$.model == m]
+act_2023 <- mean(abs_horizon$Turnover[year(abs_horizon$Month) == 2023])
+act_2024 <- mean(abs_horizon$Turnover[year(abs_horizon$Month) == 2024])
+n_under_arima <- fc_full |>
+  as_tibble() |>
+  filter(.model == "arima") |>
+  inner_join(abs_horizon |> as_tibble() |> select(Month, Actual = Turnover), by = "Month") |>
+  summarise(n = sum(Actual > .mean)) |>
+  pull(n)
+```
+
+**Both models under-forecast, but ETS(A,A,A) did much better.** Turnover kept growing strongly: average monthly turnover rose from \$`r round(last_level, 1)`M in 2022 to \$`r round(act_2023, 1)`M in 2023 (`r round(100 * (act_2023 / last_level - 1))`%) and \$`r round(act_2024, 1)`M in 2024 (a further `r round(100 * (act_2024 / act_2023 - 1))`%). Both models' mean errors are positive, meaning both forecasts were too low on average.
+
+- **ETS(A,A,A)** was close: RMSE `r round(ab("ets", "RMSE"), 2)` and MAPE `r round(ab("ets", "MAPE"), 2)`%, and a MASE of `r round(ab("ets", "MASE"), 2)` (well below 1, so its errors were much smaller than the typical error of a seasonal naive forecast). Its 2024 average forecast (\$`r round(ab("ets", "fc_2024"), 1)`M) was within \$`r round(act_2024 - ab("ets", "fc_2024"), 1)`M of the actual value. The extra growth it learned from 2021-2022 (the larger $\beta$ in Section 9) is what made the difference: recent growth turned out to be a better guide than the long-run average.
+- **ARIMA(0,1,1)(0,1,1)~12~** was further off: RMSE `r round(ab("arima", "RMSE"), 2)`, MAPE `r round(ab("arima", "MAPE"), 2)`% and MASE `r round(ab("arima", "MASE"), 2)` (above 1, so its errors were larger than the typical error of a seasonal naive forecast). Its long-run-average growth rate was too slow, so its forecasts fell further below the actual values as the horizon lengthened, reaching \$`r round(ab("arima", "fc_2024"), 1)`M on average in 2024 against \$`r round(act_2024, 1)`M. The actual value was above the ARIMA forecast in `r n_under_arima` of the `r nrow(abs_horizon)` months, so the errors were not random: they show a systematic bias in the growth rate, not bad luck.
+- **Prediction intervals.** `r round(ab("ets", "cover80"))`% of the actual values fell inside the ETS 80% intervals and `r round(ab("arima", "cover80"))`% inside the ARIMA 80% intervals. Even the ARIMA forecasts, which were biased, stayed inside their intervals. As in Sections 6 and 7, the intervals were wider than needed, consistent with the heavy-tailed residuals inflating the estimated variance.
+
+**Why did turnover grow faster than the long-run trend?** Several things pushed WA food spending up in 2023-2024. Western Australia had the fastest population growth of any state, driven by record overseas migration and people moving from other states, so there were simply more households buying food. Food price inflation remained high through 2023 before easing in 2024, which raises turnover in current dollars even when volumes do not change. The WA economy was also strong on the back of the resources sector, with low unemployment supporting spending. These are the same forces that drove the 2022 rise, so a model that weighted recent growth more heavily (the refitted ETS) did better than one built around the long-run average (ARIMA). The months after the forecast horizon show growth continuing into 2025.
+
+**Overall**, this confirms the choice in Section 8: the ETS(A,A,A) forecasts were the more accurate. It is worth being honest that part of its success came from a parameter change when the model was refitted, which happened to suit the next two years; had food inflation and population growth slowed sharply, the more conservative ARIMA forecasts could have done better.
+
+# 11. Benefits and limitations of the two models
+
+```{r}
+#| label: bias-numbers
+#| echo: false
+# How far the bias-adjusted mean (fable's point forecast) sits above the median
+bias_gap <- fc_full |>
+  mutate(median = median(Turnover)) |>
+  as_tibble() |>
+  group_by(.model) |>
+  summarise(h1 = 100 * (first(.mean) / first(median) - 1), h24 = 100 * (last(.mean) / last(median) - 1))
+bg <- \(m, col) bias_gap[[col]][bias_gap$.model == m]
+```
+
+**Interpretability.** ETS(A,A,A) is easier to explain, because its parts are a level, a growth rate of about `r round(100 * (exp(12 * slope_last) - 1), 1)`% a year and a December peak about `r round(100 * (exp(dec_last) - 1))`% above the level (training fit). ARIMA's coefficients only make sense once translated into how much of each surprise is kept.
+
+**Changing seasonality.** Both models let the December peak evolve, which this series needs. However, after refitting on all the data, ETS's $\gamma$ fell to almost zero, so its 2023-2024 forecasts hold the seasonal pattern fixed at its 2022 shape.
+
+**Sensitivity to recent data.** Both models over-forecast 2021 because training ended just after the COVID-19 jump. When refitted, the ETS growth parameter $\beta$ rose from `r num(pc("ETS", "beta", "Training"))` to `r num(pc("ETS", "beta", "Full data"))`. That happened to suit 2023-2024, but it shows ETS can be swayed by a few unusual years, while ARIMA was stable but slower to pick up faster growth.
+
+**Assuming the past continues.** Both models use only past turnover, so they cannot foresee shocks like Y2K, the GST or COVID-19, or use the drivers behind 2023-2024 such as WA population growth and food prices. Because turnover is in current dollars, a change in inflation would push both forecasts wrong in the same direction.
+
+**Residuals and intervals.** The ARIMA residuals are white noise (p = `r round(lb_arima$lb_pvalue, 2)`) while the ETS residuals are borderline (p = `r round(lb_ets$lb_pvalue[lb_ets$dof == 0], 2)`), so ARIMA uses short-term information better even though ETS forecast more accurately. Both have long-tailed residuals, so their intervals were too wide in ordinary months: `r if (all(abs_summary$cover80 == 100)) "every test-set month and every 2023-2024 month fell inside the 80% intervals" else paste0("every test-set month, and ", round(ab("ets", "cover80")), "% (ETS) and ", round(ab("arima", "cover80")), "% (ARIMA) of 2023-2024 months, fell inside the 80% intervals")`, when only about 80% would be expected.
+
+**Back-transformation bias.** Reversing the log gives the median forecast, which sits below the mean because the dollar-scale distribution is skewed. `fable` reports the bias-adjusted mean instead, and the adjustment grows with the horizon, reaching `r round(bg("arima", "h24"), 1)`% (ARIMA) and `r round(bg("ets", "h24"), 1)`% (ETS) after two years.
+
+**Overall.** ETS(A,A,A) gave the more accurate and more easily explained forecasts, but it depends more on its latest estimates. ARIMA is more stable and has cleaner residuals, but it under-forecast the strong recent growth.

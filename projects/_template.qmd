@@ -56,11 +56,10 @@ just "I used fixed effects" but why fixed effects rather than pooled OLS.
 
 ## Findings
 
-Display one or two figures. Preferred pattern is a pre-exported PNG:
+Display one or two figures. Preferred pattern is a pre-exported PNG, written
+plainly (no wrapper div) so it is drawn at the text-column width:
 
-::: {.column-page}
-![Fig 1. Caption states the finding, not the chart type.](../assets/figures/your-figure.png){.figure-wide}
-:::
+![Fig 1. Caption states the finding, not the chart type.](../assets/figures/your-figure.png)
 
 State the headline numbers in the prose around the figure.
 

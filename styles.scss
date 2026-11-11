@@ -20,20 +20,27 @@ $primary: #185fa5;
 /*-- scss:rules --*/
 
 // Reading measure is set by grid.body-width in _quarto.yml, NOT here. Capping
-// main.content squeezes Quarto's whole layout grid, which shrinks .column-page
-// figures until they end up narrower than the text they are meant to break out
-// past. Leave this uncapped and tune the grid instead.
+// main.content squeezes Quarto's whole layout grid. Leave this uncapped and
+// tune the grid instead.
 main.content {
   max-width: none;
 }
 
-// Break a figure out past the text column. Apply with a fenced div:
-// ::: {.column-page}
-// No cap, so a wide figure fills whatever the column-page grid track allows.
-.column-page .figure-wide,
-.figure-wide {
-  max-width: 100%;
-  margin-inline: auto;
+// Every captioned figure is exactly the width of the text column: small PNGs
+// scale up and large ones scale down, so figures line up across all pages.
+// Captionless images (the About headshot) are not .figure-img and are unaffected.
+img.figure-img {
+  width: 100%;
+  height: auto;
+}
+
+// Full-length report embedded in a project page (see wa-retail-forecasting.qmd).
+.report-embed {
+  width: 100%;
+  height: 85vh;
+  min-height: 600px;
+  border: 1px solid #e6e4dd;
+  border-radius: 8px;
 }
 
 // Title block. Kicker-style category, serif title, muted description.

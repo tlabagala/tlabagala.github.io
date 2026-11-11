@@ -70,9 +70,7 @@ averaged over all twelve draft positions, the engine on the aging-curve board be
 the naive draft by **14.6%** in starting-lineup points. It won all 13 held-out
 seasons (2013-14 to 2025-26) and 85% of the 156 slot-seasons.
 
-::: {.column-page}
-![Fig 1. The draft engine is the only component that beats naive drafting on its own - and the better aging-curve board nearly doubles its edge, from +7.8% to +14.6%.](../assets/figures/nba-head-to-head.png){.figure-wide}
-:::
+![Fig 1. The draft engine is the only component that beats naive drafting on its own - and the better aging-curve board nearly doubles its edge, from +7.8% to +14.6%.](../assets/figures/nba-head-to-head.png)
 
 Drafting straight down the value-over-replacement board was **11.8% worse** than
 naive: it inflated centres, so in 2023-24 it took Embiid and Vucevic while Doncic
@@ -81,9 +79,7 @@ sat on the board. The better projection was worth nothing as a ranking on its ow
 
 Getting a number I trust took more work on the *test* than on the model:
 
-::: {.column-page}
-![Fig 2. Measured with every team on the same board, the engine shows no edge at all (-0.2%); holding the opponents fixed reveals a clear one (+7.8%).](../assets/figures/nba-measurement.png){.figure-wide}
-:::
+![Fig 2. Measured with every team on the same board, the engine shows no edge at all (-0.2%); holding the opponents fixed reveals a clear one (+7.8%).](../assets/figures/nba-measurement.png)
 
 Last season's total proved a hard projection to beat. Only the aging curve
 improved it (mean absolute error 501.8 vs 508.9 points) and it cut the systematic

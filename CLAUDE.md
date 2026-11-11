@@ -123,7 +123,7 @@ charts look designed rather than default.
    Current taxonomy (the sidebar groups categories under these facets):
    - Language: R, Python, SQL
    - Problem type: Machine learning, Econometrics, Forecasting, Text analytics, Simulation
-   - Domain: Health, Sport, Public policy, Media
+   - Domain: Health, Sport, Public policy, Media, Retail
 
    Reuse an existing category where one fits. If a new one is genuinely needed,
    add it to the `categoryFacets` object in `index.qmd` (otherwise it lands in an
@@ -152,8 +152,14 @@ automatically from the new page's YAML header.
 - Figure captions state the finding, not the chart type. "Cost per tonne
   diverged from budget from Q3, driven by rate not volume", not "Cost over time".
 - Keep the body text column narrow (set by `grid` in `_quarto.yml`, not in
-  `styles.scss`); let key figures break out wider using a `::: {.column-page}`
-  fenced div.
+  `styles.scss`). Every captioned figure is drawn at exactly the text-column
+  width (`img.figure-img` in `styles.scss`). Do not wrap figures in
+  `::: {.column-page}` or make them wider than the text.
+- A full-length report (e.g. a rendered coursework HTML) can be embedded with
+  `<iframe class="report-embed" src="../assets/reports/<name>.html" loading="lazy">`,
+  listed under `resources:` in the page YAML, plus a link to open it in a new tab.
+  Its source lives in `_reports/<slug>/` (outside the render globs) and is
+  rendered on its own, never as part of the site.
 
 ## Employer-data caution
 

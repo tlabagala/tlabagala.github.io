@@ -145,9 +145,7 @@ alone.
 
 ## Findings
 
-::: {.column-page}
-![Fig 1. The boosting blend reached 0.942 out-of-fold and logistic regression (0.829) scored above the random forest (~0.81), but these scores come from different evaluations.](../assets/figures/icu-model-comparison.png){.figure-wide}
-:::
+![Fig 1. The boosting blend reached 0.942 out-of-fold and logistic regression (0.829) scored above the random forest (~0.81), but these scores come from different evaluations.](../assets/figures/icu-model-comparison.png)
 
 On the public leaderboard, kNN scored 0.761, the MLP 0.771 and logistic regression
 0.829. Logistic regression finishing ahead of the neural network suggests mortality

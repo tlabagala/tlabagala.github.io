@@ -176,18 +176,26 @@ grid:
 ```
 
 Keep it there. Capping `main.content` in `styles.scss` instead squeezes Quarto's
-whole layout grid, so `.column-page` figures end up narrower than the text they
-are meant to break out past. That is why `styles.scss` sets
+whole layout grid. That is why `styles.scss` sets
 `main.content { max-width: none; }`.
 
-To let one figure break out past that column, wrap it in a fenced div in the
-`.qmd`:
+Every captioned figure is drawn at exactly the width of the text column
+(`img.figure-img { width: 100%; }` in `styles.scss`), so figures line up across
+pages. Write figures plainly, with no wrapper div:
 
 ```markdown
-::: {.column-page}
 ![Caption stating the finding](../assets/figures/name.png)
-:::
 ```
+
+A full-length report can be embedded in a page with an iframe, as the WA retail
+forecasting page does:
+
+```markdown
+<iframe class="report-embed" src="../assets/reports/name.html" loading="lazy" title="..."></iframe>
+```
+
+List the file under `resources:` in the page YAML so Quarto copies it into
+`_site/`.
 
 ### Project summary box
 
