@@ -52,6 +52,7 @@ format:
     anchor-sections: true
     fig-align: left
     include-in-header:
+      - file: _includes/analytics.html   # GA4, live hostname only
       - text: |
           <link rel="preconnect" href="https://fonts.googleapis.com">
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

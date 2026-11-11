@@ -161,6 +161,17 @@ automatically from the new page's YAML header.
   Its source lives in `_reports/<slug>/` (outside the render globs) and is
   rendered on its own, never as part of the site.
 
+## Analytics
+
+Google Analytics 4 lives entirely in `_includes/analytics.html`, pulled into
+every page's `<head>` by `include-in-header` in `_quarto.yml`. It loads only on
+the live hostname (`tlabagala.github.io`), so local previews never send data.
+Page views, outbound clicks and PDF downloads come from GA4 enhanced
+measurement. Custom events (`category_filter`, `project_card_click`,
+`report_open`) come from one delegated click listener in that file. To track a
+new kind of click, add a branch to that listener - do not add inline analytics
+scripts to individual pages.
+
 ## Employer-data caution
 
 Some projects use the author's employer data (a meat company: freight cost and
