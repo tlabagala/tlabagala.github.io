@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/projects/wa-retail-forecasting.html",
       "/projects/nba-fantasy-draft.html",
       "/projects/icu-mortality-prediction.html",
       "/projects/victorian-lga-crime.html",
