@@ -291,6 +291,86 @@ h2.listing-heading {
   }
 }
 
+// About page experience: a vertical timeline. One line runs down between the
+// date column and the content, with a dot per role. Key roles first; the
+// analytics roles (.is-accent) get a filled accent dot, other key roles a
+// filled grey one, and the closing .tl-also group a hollow dot with compact
+// one-liners. Accent-against-grey, as in the figures.
+$tl-grey: #bfbfbf;    // ggplot grey75 = portfolio_grey
+$tl-date-w: 9.5rem;
+$tl-gap: 2.25rem;     // date column to content; the line sits in the middle
+$tl-line-x: $tl-date-w + $tl-gap / 2;
+.timeline.tl-vertical {
+  // The line is drawn per role, from its dot down to the next role's dot,
+  // so it stops at the last dot instead of running past it.
+  .tl-item:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: $tl-line-x;
+    top: 1.45rem;
+    bottom: -1.05rem;
+    width: 2px;
+    margin-left: -1px;
+    background: #e6e4dd;
+  }
+  .tl-item {
+    position: relative;
+    column-gap: $tl-gap;
+    grid-template-columns: $tl-date-w 1fr;
+    padding: 0.7rem 0 1rem;
+    border-top: 0;
+    &::before {
+      content: "";
+      position: absolute;
+      left: $tl-line-x;
+      top: 1.05rem;
+      width: 0.8rem;
+      height: 0.8rem;
+      margin-left: -0.4rem;
+      border-radius: 50%;
+      background: $tl-grey;
+      box-shadow: 0 0 0 4px $body-bg;   // gap between dot and line
+      z-index: 1;
+    }
+    &.is-accent::before { background: $primary; }
+  }
+  .tl-also {
+    &::before { background: $body-bg; border: 2px solid $tl-grey; }
+    ul {
+      grid-column: 2;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    li {
+      margin: 0 0 0.3rem;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+  }
+  .tl-also-date {
+    margin-left: 0.4rem;
+    font-size: 0.82rem;
+    color: #8a8883;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+}
+// Phones: line down the left edge, date above each role.
+@media (max-width: 575.98px) {
+  .timeline.tl-vertical {
+    .tl-item {
+      grid-template-columns: 1fr;
+      column-gap: 0;
+      padding-left: 1.6rem;
+      &::before { left: 0.4rem; top: 0.95rem; }
+    }
+    .tl-item:not(:last-child)::after { left: 0.4rem; top: 1.35rem; bottom: -0.95rem; }
+    .tl-also ul { grid-column: 1; }
+    .tl-also-date { display: block; margin-left: 0; }
+  }
+}
+
 // About page tool groups: group label beside its tools.
 .tool-groups dl {
   display: grid;

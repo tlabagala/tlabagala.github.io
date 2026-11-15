@@ -5,23 +5,25 @@ code-tools: false
 
 ![](assets/headshot.jpg){.headshot fig-alt="Tristan Labagala"}
 
-I'm Tristan Labagala, a Monash University Commerce and IT student majoring in Business Analytics and Business Information Systems, graduating in November 2026. The problems I like most start with messy data and end with a decision someone has to make. As a finance intern at JBS Pork Australia, that meant reconciling freight costs across the SAP and CSB ERP systems and building Excel dashboards that compared forecasts and budgets with actuals. At the Monash Statistical Analytics Club I lead a team of student analysts, which won Best Team at the inaugural Data Analytics Initiative Pitch Night in October 2026.
+I'm Tristan Labagala, a Monash University Commerce and IT student majoring in Business Analytics and Business Information Systems, graduating in November 2026. The problems I like most start with messy data and end with a decision someone has to make.
+
+Outside of work, I enjoy playing and refereeing basketball. I am currently undertaking my Level 1 accreditation, with hopes to referee on the Victorian Junior Basketball League (VJBL) panel in 2027, which is the highest junior state league in Victoria. 
 
 ## Experience
 
-::: {.timeline}
-::: {.tl-item}
-[Jul 2026 - Oct 2026]{.tl-date}
+::: {.timeline .tl-vertical}
+::: {.tl-item .is-accent}
+[Jul - Oct 2026]{.tl-date}
 
 **Data Analytics Initiative Team Lead** · Monash Statistical Analytics Club (MSAC)\
-Leading student analysts; the team won Best Team at the inaugural MSAC DAI Pitch Night (Oct 2026).
+Led a team of four student analysts measuring how far cyclones move banana prices and how long the effects persist; won Best Team at the inaugural MSAC DAI Pitch Night (Oct 2026).
 :::
 
-::: {.tl-item}
+::: {.tl-item .is-accent}
 [Jun - Jul 2026]{.tl-date}
 
 **Finance Intern** · JBS Pork Australia\
-Freight cost reconciliation across the SAP and CSB ERP systems; Excel dashboards for forecast vs actual and actual vs budget.
+Reconciled freight costs across the SAP and CSB ERP systems, and built Excel dashboards for the finance and logistics teams comparing forecast with actual and actual with budget.
 :::
 
 ::: {.tl-item}
@@ -31,22 +33,12 @@ Freight cost reconciliation across the SAP and CSB ERP systems; Excel dashboards
 Secured a record 12+ sponsors for 2026.
 :::
 
-::: {.tl-item}
-[Feb 2025 - present]{.tl-date}
+::: {.tl-item .tl-also}
+[Alongside study]{.tl-date}
 
-**Referee Supervisor** · Westgate Basketball Association
-:::
-
-::: {.tl-item}
-[Sep 2023 - present]{.tl-date}
-
-**Control Room Operator** · Melbourne Park
-:::
-
-::: {.tl-item}
-[Nov 2022 - Aug 2025]{.tl-date}
-
-**Basketball Coach** · Westgate Imperials
+- **Referee Supervisor** · Westgate Basketball Association [Feb 2025 - present]{.tl-also-date}
+- **Control Room Operator** · Melbourne Park [Sep 2023 - present]{.tl-also-date}
+- **Basketball Coach** · Westgate Imperials [Nov 2022 - Aug 2025]{.tl-also-date}
 :::
 :::
 
@@ -74,7 +66,7 @@ Linked items open the matching projects in my [portfolio](index.qmd).
 
 ::: {.tool-groups}
 **Languages**
-: [R](index.qmd#category=R) (tidyverse, ggplot2, fixest, lme4, mgcv) · [Python](index.qmd#category=Python) (scikit-learn, LightGBM, matplotlib) · SQL
+: [R](index.qmd#category=R) · [Python](index.qmd#category=Python) · SQL
 
 **Methods**
 : [Machine learning](index.qmd#category=Machine%20learning) · [Econometrics](index.qmd#category=Econometrics) · [Forecasting](index.qmd#category=Forecasting) · [Text analytics](index.qmd#category=Text%20analytics) · [Simulation](index.qmd#category=Simulation) · Data visualisation
