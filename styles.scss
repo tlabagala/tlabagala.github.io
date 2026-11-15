@@ -36,6 +36,15 @@ main.content p > img:not(.headshot) {
   height: auto;
 }
 
+// Full-length report embedded in a project page (see wa-retail-forecasting.qmd).
+.report-embed {
+  width: 100%;
+  height: 85vh;
+  min-height: 600px;
+  border: 1px solid #e6e4dd;
+  border-radius: 8px;
+}
+
 // Title block. Kicker-style category, serif title, muted description.
 .quarto-title .quarto-categories {
   gap: 0.4rem;
@@ -80,6 +89,16 @@ main.content p > img:not(.headshot) {
 .listing-category {
   font-size: 0.72rem !important;
   letter-spacing: 0.02em;
+}
+
+// Facet headings injected into the category sidebar by index.qmd.
+.quarto-listing-category .category-facet-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a8880;
+  margin: 1rem 0 0.25rem;
 }
 
 // Figure captions: quieter, left-aligned, so the finding reads as an aside.

@@ -115,10 +115,21 @@ charts look designed rather than default.
 
 1. Copy `projects/_template.qmd` to `projects/<slug>.qmd`.
 2. Fill the YAML header: `title`, `description`, `date`, `categories`, `image`.
-   `description` is the card text: lead with the headline result. `categories`
-   are 1-2 broad groups from Machine Learning, Econometrics & Statistics, Data
-   Engineering & BI, Business Analysis - tool names belong in the summary box
-   Skills line instead.
+   `description` is the card text: lead with the headline result.
+   The `categories` become the filter pills and the per-card badges. Keep them
+   broad so they aggregate across projects: one language, one or two problem
+   types, and one domain (e.g. `[R, Econometrics, Machine learning, Public policy]`).
+   Specific packages belong in the summary box's Skills line, not here.
+
+   Current taxonomy (the sidebar groups categories under these facets):
+   - Language: R, Python, SQL
+   - Problem type: Machine learning, Econometrics, Forecasting, Text analytics, Simulation
+   - Domain: Health, Sport, Public policy, Media, Retail
+
+   Reuse an existing category where one fits. If a new one is genuinely needed,
+   add it to the `categoryFacets` object in `index.qmd` (otherwise it lands in an
+   "Other" group), and link it from the Tools section of `about.qmd` if relevant.
+   About-page links use the form `index.qmd#category=Machine%20learning`.
 3. Add the page to `projects/thumbs/make_thumbnails.R` (headline number plus a
    simple visual, numbers taken from the page), re-run it, and point `image:` at
    `thumbs/<slug>.png`. Keep the full figure as the link preview with
@@ -148,6 +159,22 @@ automatically from the new page's YAML header.
   `styles.scss`). Every in-page figure and image spans exactly the text column
   (set in `styles.scss`) - do not wrap figures in `::: {.column-page}` or other
   breakout divs.
+- A full-length report (e.g. a rendered coursework HTML) can be embedded with
+  `<iframe class="report-embed" src="../assets/reports/<name>.html" loading="lazy">`,
+  listed under `resources:` in the page YAML, plus a link to open it in a new tab.
+  Its source lives in `_reports/<slug>/` (outside the render globs) and is
+  rendered on its own, never as part of the site.
+
+## Analytics
+
+Google Analytics 4 lives entirely in `_includes/analytics.html`, pulled into
+every page's `<head>` by `include-in-header` in `_quarto.yml`. It loads only on
+the live hostname (`tlabagala.github.io`), so local previews never send data.
+Page views, outbound clicks and PDF downloads come from GA4 enhanced
+measurement. Custom events (`category_filter`, `project_card_click`,
+`report_open`) come from one delegated click listener in that file. To track a
+new kind of click, add a branch to that listener - do not add inline analytics
+scripts to individual pages.
 
 ## Employer-data caution
 

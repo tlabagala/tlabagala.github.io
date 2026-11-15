@@ -70,12 +70,17 @@ High Distinction.
 
 ## Tools
 
+Linked items open the matching projects in my [portfolio](index.qmd).
+
 ::: {.tool-groups}
-**Analysis**
-: R (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL · Excel
+**Languages**
+: [R](index.qmd#category=R) (tidyverse, ggplot2, fixest, lme4, mgcv) · [Python](index.qmd#category=Python) (scikit-learn, LightGBM, matplotlib) · SQL
+
+**Methods**
+: [Machine learning](index.qmd#category=Machine%20learning) · [Econometrics](index.qmd#category=Econometrics) · [Forecasting](index.qmd#category=Forecasting) · [Text analytics](index.qmd#category=Text%20analytics) · [Simulation](index.qmd#category=Simulation) · Data visualisation
 
 **BI**
-: Power BI
+: Power BI · Excel
 
 **Workflow**
 : Git · Quarto · VS Code

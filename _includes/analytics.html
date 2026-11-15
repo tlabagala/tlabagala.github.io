@@ -1,0 +1,68 @@
+<!--
+  Google Analytics 4. Included in every page's <head> via _quarto.yml.
+  - Loads only on the live hostname, so `quarto preview` and local _site
+    visits never reach the data.
+  - Page views, outbound clicks (GitHub, LinkedIn) and PDF downloads come from
+    GA4 enhanced measurement, so this file has no code for them.
+  - The click listener below adds events for the site's own interactions. To
+    track a new kind of click, add a branch here, not an inline script on a page.
+  Event parameters (project, category, link_url) must be registered as
+  event-scoped custom dimensions in GA4 Admin to appear in reports.
+-->
+<script>
+(function () {
+  var GA_ID = "G-JHZ8J4XM7M";               // GA4 measurement ID
+  var LIVE_HOST = "tlabagala.github.io";
+  if (location.hostname !== LIVE_HOST || /X{4,}/.test(GA_ID)) return;
+
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+  document.head.appendChild(s);
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { dataLayer.push(arguments); };
+  gtag("js", new Date());
+  gtag("config", GA_ID);
+
+  var decodeCategory = function (b64) {
+    try { return decodeURIComponent(atob(b64)); } catch (e) { return null; }
+  };
+
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!(t instanceof Element)) return;
+
+    // Category filter: sidebar pills on the Work page ("All" has an empty value)
+    var pill = t.closest(".quarto-listing-category .category");
+    if (pill) {
+      var name = decodeCategory(pill.dataset.category || "");
+      gtag("event", "category_filter", { category: name || "All", source: "sidebar" });
+      return;
+    }
+
+    // Category filter: badge on a project card
+    var badge = t.closest(".listing-category");
+    if (badge) {
+      gtag("event", "category_filter", { category: badge.textContent.trim(), source: "card" });
+      return;
+    }
+
+    // Project card on the Work page
+    var card = t.closest("a.quarto-grid-link");
+    if (card) {
+      var title = card.querySelector(".listing-title");
+      gtag("event", "project_card_click", {
+        project: title ? title.textContent.trim() : card.getAttribute("href")
+      });
+      return;
+    }
+
+    // Full report or paper opened from a project page
+    var link = t.closest("a[href]");
+    if (link && /assets\/(reports|papers)\//.test(link.getAttribute("href"))) {
+      gtag("event", "report_open", { link_url: link.href });
+    }
+  });
+})();
+</script>

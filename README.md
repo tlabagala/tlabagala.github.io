@@ -179,12 +179,23 @@ Keep it there. Capping `main.content` in `styles.scss` instead squeezes Quarto's
 whole layout grid. That is why `styles.scss` sets
 `main.content { max-width: none; }`.
 
-Figures and images span exactly the text column - `styles.scss` sizes them to
-it - so a plain image line is all a page needs:
+Every in-page figure and image is drawn at exactly the width of the text
+column (`styles.scss` sizes them to it), so figures line up across pages. Write
+figures plainly, with no wrapper div:
 
 ```markdown
 ![Caption stating the finding](../assets/figures/name.png)
 ```
+
+A full-length report can be embedded in a page with an iframe, as the WA retail
+forecasting page does:
+
+```markdown
+<iframe class="report-embed" src="../assets/reports/name.html" loading="lazy" title="..."></iframe>
+```
+
+List the file under `resources:` in the page YAML so Quarto copies it into
+`_site/`.
 
 ### Project summary box
 

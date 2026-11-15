@@ -2,7 +2,7 @@
 title: "Can a smarter strategy beat drafting off last season's totals?"
 description: "+14.6% starting-lineup points over the naive draft, winning all 13 held-out seasons. Python projection model, lineup-aware draft engine and leakage-free backtest."
 date: 2026-10-16
-categories: [Machine Learning, Data Engineering & BI]
+categories: [Python, Forecasting, Simulation, Sport]
 image: "thumbs/nba-fantasy-draft.png"
 image-alt: "Starting-lineup points up 14.6 per cent on the naive draft, beside bars for four draft strategies with the draft engine highest."
 # Link previews keep the full in-page figure; the card uses the thumbnail.

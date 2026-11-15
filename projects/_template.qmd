@@ -2,7 +2,7 @@
 title: "A question in plain English?"
 description: "Lead with the headline result and its baseline, then the method in a few words."
 date: 2026-01-01
-categories: [Machine Learning]
+categories: [R, Machine learning, Health]
 image: "thumbs/your-slug.png"
 image-alt: "Short description of the thumbnail."
 # Keep the full figure as the link preview; the card uses the thumbnail.
@@ -18,9 +18,9 @@ template in place - the leading underscore keeps it off the site.
 
 Rules:
 - Title is a plain-English question, not a method name.
-- categories are 1-2 broad groups from: Machine Learning, Econometrics &
-  Statistics, Data Engineering & BI, Business Analysis. Tool names go in the
-  summary box Skills line, not here.
+- categories become the filter pills and per-card badges. Keep them broad,
+  one language + one or two problem types + one domain, drawn from the
+  taxonomy in CLAUDE.md. Specific packages go in the Skills line instead.
 - Add a card thumbnail to projects/thumbs/make_thumbnails.R and re-run it.
 - Keep the body roughly 600-900 words.
 - Follow the section order below. The summary box and the "Assumptions and
@@ -62,7 +62,8 @@ just "I used fixed effects" but why fixed effects rather than pooled OLS.
 
 ## Findings
 
-Display one or two figures. Preferred pattern is a pre-exported PNG:
+Display one or two figures. Preferred pattern is a pre-exported PNG, written
+plainly (no wrapper div) so it is drawn at the text-column width:
 
 ![Fig 1. Caption states the finding, not the chart type.](../assets/figures/your-figure.png)
 

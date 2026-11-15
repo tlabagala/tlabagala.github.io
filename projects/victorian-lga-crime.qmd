@@ -2,7 +2,7 @@
 title: "What predicts crime across Victoria's LGAs?"
 description: "Elastic net predicted best (test R² 0.777) across 78 Victorian LGAs, 2011-2024; fixed effects showed which drivers hold within an area."
 date: 2026-05-01
-categories: [Econometrics & Statistics]
+categories: [R, Econometrics, Machine learning, Public policy]
 image: "thumbs/victorian-lga-crime.png"
 image-alt: "Test R-squared of 0.777 predicting crime rates by LGA, across 78 Victorian LGAs, 14 years and 1,092 LGA-years."
 # Link previews keep the choropleth; the card uses the thumbnail.

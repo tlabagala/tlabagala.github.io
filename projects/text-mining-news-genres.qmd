@@ -2,7 +2,7 @@
 title: "Can word frequencies alone tell sport from politics?"
 description: "60% of genre labels recovered from word frequencies alone (vs 33% chance), and why one preprocessing setting capped it."
 date: 2025-05-29
-categories: [Machine Learning]
+categories: [R, Text analytics, Machine learning, Media]
 image: "thumbs/text-mining-news-genres.png"
 image-alt: "60% of genre labels recovered from word counts alone, against a 33% chance baseline."
 # Link previews keep the full in-page figure; the card uses the thumbnail.
