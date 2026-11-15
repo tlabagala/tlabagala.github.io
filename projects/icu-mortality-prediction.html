@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="dcterms.date" content="2026-05-24">
-<meta name="description" content="Five model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, built for a Kaggle competition.">
+<meta name="description" content="Out-of-fold ROC-AUC of 0.942 ranking ICU mortality risk. Five model families benchmarked, then a LightGBM + XGBoost blend in R.">
 
-<title>ICU Mortality Probability Prediction – Tristan Labagala</title>
+<title>Can first-day ICU data flag the patients most at risk? – Tristan Labagala</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -83,7 +83,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-49c787a6c175d90e42264fbd7996148e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-9b3a33bf91facc83bce7e981fd5decb6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d6420fc87a7c1647d90fa2a833a155ba.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -184,17 +184,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet">
 
 
-<meta property="og:title" content="ICU Mortality Probability Prediction – Tristan Labagala">
-<meta property="og:description" content="Five model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, built for a Kaggle competition.">
+<meta property="og:title" content="Can first-day ICU data flag the patients most at risk? – Tristan Labagala">
+<meta property="og:description" content="Out-of-fold ROC-AUC of 0.942 ranking ICU mortality risk. Five model families benchmarked, then a LightGBM + XGBoost blend in R.">
 <meta property="og:image" content="https://tlabagala.github.io/assets/figures/icu-model-comparison.png">
 <meta property="og:site_name" content="Tristan Labagala">
 <meta property="og:image:height" content="1260">
 <meta property="og:image:width" content="2400">
-<meta property="og:image:alt" content="Horizontal bar chart of ROC-AUC by model, with the boosting blend highest at 0.942.">
-<meta name="twitter:title" content="ICU Mortality Probability Prediction – Tristan Labagala">
-<meta name="twitter:description" content="Five model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, built for a Kaggle competition.">
+<meta property="og:image:alt" content="ROC-AUC of 0.942 ranking ICU mortality risk, beside bars for five models with the boosting blend highest.">
+<meta name="twitter:title" content="Can first-day ICU data flag the patients most at risk? – Tristan Labagala">
+<meta name="twitter:description" content="Out-of-fold ROC-AUC of 0.942 ranking ICU mortality risk. Five model families benchmarked, then a LightGBM + XGBoost blend in R.">
 <meta name="twitter:image" content="https://tlabagala.github.io/assets/figures/icu-model-comparison.png">
-<meta name="twitter:image:alt" content="Horizontal bar chart of ROC-AUC by model, with the boosting blend highest at 0.942.">
+<meta name="twitter:image:alt" content="ROC-AUC of 0.942 ranking ICU mortality risk, beside bars for five models with the boosting blend highest.">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
@@ -258,7 +258,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">ICU Mortality Probability Prediction</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<div class="quarto-title-block"><div><h1 class="title">Can first-day ICU data flag the patients most at risk?</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
   <div class="quarto-categories">
     <div class="quarto-category">R</div>
     <div class="quarto-category">Machine learning</div>
@@ -268,7 +268,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    Five model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, built for a Kaggle competition.
+    Out-of-fold ROC-AUC of 0.942 ranking ICU mortality risk. Five model families benchmarked, then a LightGBM + XGBoost blend in R.
   </div>
 </div>
 
@@ -938,207 +938,212 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   window.quartoScrollableRegionsLabels = {"code":"Scrollable code","output":"Scrollable output"};
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "ICU Mortality Probability Prediction"</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "Five model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, built for a Kaggle competition."</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Can first-day ICU data flag the patients most at risk?"</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "Out-of-fold ROC-AUC of 0.942 ranking ICU mortality risk. Five model families benchmarked, then a LightGBM + XGBoost blend in R."</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2026-05-24</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [R, Machine learning, Health]</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="an">image:</span><span class="co"> "../assets/figures/icu-model-comparison.png"</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="an">image-alt:</span><span class="co"> "Horizontal bar chart of ROC-AUC by model, with the boosting blend highest at 0.942."</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># The page used to live at icu-mortality-prediction_1.html; keep old links working.</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="an">aliases:</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">  - icu-mortality-prediction_1.html</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">  # Code on this page is shown to explain the method, never run. MIMIC-III is</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">  # credentialled-access data and is not in this repo, and the full fit is 30</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">  # boosted models with early stopping. Blocks are folded by default.</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">  eval: false</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>::: {.project-summary}</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Problem:** Rank ICU patients by their risk of dying in hospital, using what is known when they arrive, so attention goes to the highest-risk patients first.</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Approach:** Five model families compared under one fixed preprocessing recipe, then a LightGBM and XGBoost blend tuned with repeated cross-validation.</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Result:** Out-of-fold ROC-AUC of 0.942; the top grade band started at 0.94. Logistic regression beat the neural network.</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skills:** R, tidymodels, LightGBM, XGBoost, feature engineering, cross-validation.</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="fu">## The question</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>Given only what is known about a patient at the moment they arrive in intensive</span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>care, how well can we predict whether they will die before discharge? The purpose</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>is triage rather than explanation - ranking patients so that limited clinical</span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>attention flows toward the people most likely to need it.</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="an">image:</span><span class="co"> "thumbs/icu-mortality-prediction.png"</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="an">image-alt:</span><span class="co"> "ROC-AUC of 0.942 ranking ICU mortality risk, beside bars for five models with the boosting blend highest."</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Link previews keep the full in-page figure; the card uses the thumbnail.</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="an">open-graph:</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">  image: "../assets/figures/icu-model-comparison.png"</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="an">twitter-card:</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">  image: "../assets/figures/icu-model-comparison.png"</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># The page used to live at icu-mortality-prediction_1.html; keep old links working.</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="an">aliases:</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">  - icu-mortality-prediction_1.html</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">  # Code on this page is shown to explain the method, never run. MIMIC-III is</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">  # credentialled-access data and is not in this repo, and the full fit is 30</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">  # boosted models with early stopping. Blocks are folded by default.</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">  eval: false</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>::: {.project-summary}</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Problem:** Rank ICU patients by their risk of dying in hospital, using what is known when they arrive, so attention goes to the highest-risk patients first.</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Approach:** Five model families compared under one fixed preprocessing recipe, then a LightGBM and XGBoost blend tuned with repeated cross-validation.</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Result:** Out-of-fold ROC-AUC of 0.942; the top grade band started at 0.94. Logistic regression beat the neural network.</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Skills:** R, tidymodels, LightGBM, XGBoost, feature engineering, cross-validation.</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="fu">## The question</span></span>
 <span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>The work was a Kaggle competition for a machine learning unit, graded on ROC-AUC</span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>on a hidden test set in bands topping out at 0.94. Submissions had to be</span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>probabilities, so nothing could be tuned to a threshold, and the leaderboard only</span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>showed the score on half the test set - the mark came from the other half.</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>Given only what is known about a patient at the moment they arrive in intensive</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>care, how well can we predict whether they will die before discharge? The purpose</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>is triage rather than explanation - ranking patients so that limited clinical</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>attention flows toward the people most likely to need it.</span>
 <span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## Data and cleaning</span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>A preprocessed extract of MIMIC-III, one row per ICU stay: first-day vital signs</span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>summarised as min, max and mean, demographics and admission details, plus a</span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>separate table of ICD-9 diagnosis codes. The outcome, <span class="in">`HOSPITAL_EXPIRE_FLAG`</span>, is</span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>positive for roughly 11.2% of stays.</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>The work was a Kaggle competition for a machine learning unit, graded on ROC-AUC</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>on a hidden test set in bands topping out at 0.94. Submissions had to be</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>probabilities, so nothing could be tuned to a threshold, and the leaderboard only</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>showed the score on half the test set - the mark came from the other half.</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="fu">## Data and cleaning</span></span>
 <span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>Three parts needed care:</span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>**Age had to be reconstructed.** MIMIC shifts the date of birth of any patient over</span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>89 roughly 300 years into the past as a de-identification measure, so a naive</span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="in">`ADMITTIME - DOB`</span> returns ages in the hundreds. Ages were capped at 90, with an</span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>indicator kept, because being old enough to be date-shifted is itself a signal.</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>A preprocessed extract of MIMIC-III, one row per ICU stay: first-day vital signs</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>summarised as min, max and mean, demographics and admission details, plus a</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>separate table of ICD-9 diagnosis codes. The outcome, <span class="in">`HOSPITAL_EXPIRE_FLAG`</span>, is</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>positive for roughly 11.2% of stays.</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>Three parts needed care:</span>
 <span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>**The diagnosis columns were unusable raw.** Free-text <span class="in">`DIAGNOSIS`</span> held about 5,000</span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>unique values and behaved as an ID column, so it was dropped. The 555 ICD-9 codes</span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>were rolled into the ~17 standard chapters, and for the boosting pass also</span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>multi-hot encoded over the 300 most common codes.</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>**Age had to be reconstructed.** MIMIC shifts the date of birth of any patient over</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>89 roughly 300 years into the past as a de-identification measure, so a naive</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a><span class="in">`ADMITTIME - DOB`</span> returns ages in the hundreds. Ages were capped at 90, with an</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>indicator kept, because being old enough to be date-shifted is itself a signal.</span>
 <span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>**Derived features carried more signal than raw levels:** per-vital ranges, shock</span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>index and pulse pressure. A heart rate of 110 means something different at a</span>
-<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>systolic pressure of 140 than at 80.</span>
-<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: feature-engineering</span></span>
-<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>fe_basic <span class="ot">&lt;-</span> <span class="cf">function</span>(df) {</span>
-<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
-<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>      <span class="at">age_days    =</span> <span class="fu">as.numeric</span>(<span class="fu">difftime</span>(ADMITTIME, DOB, <span class="at">units =</span> <span class="st">"days"</span>)),</span>
-<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>      <span class="at">AGE         =</span> <span class="fu">pmin</span>(<span class="fu">pmax</span>(age_days <span class="sc">/</span> <span class="fl">365.25</span>, <span class="dv">0</span>), <span class="dv">90</span>),</span>
-<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>      <span class="at">AGE_OVER_89 =</span> <span class="fu">as.integer</span>(age_days <span class="sc">/</span> <span class="fl">365.25</span> <span class="sc">&gt;</span> <span class="dv">89</span>),</span>
-<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>      <span class="at">HeartRate_Range =</span> HeartRate_Max <span class="sc">-</span> HeartRate_Min,</span>
-<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>      <span class="at">SysBP_Range     =</span> SysBP_Max     <span class="sc">-</span> SysBP_Min,</span>
-<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>      <span class="at">ShockIndex    =</span> HeartRate_Mean <span class="sc">/</span> <span class="fu">na_if</span>(SysBP_Mean, <span class="dv">0</span>),</span>
-<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>      <span class="at">PulsePressure =</span> SysBP_Mean <span class="sc">-</span> DiasBP_Mean</span>
-<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
-<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>DOB, <span class="sc">-</span>ADMITTIME, <span class="sc">-</span>Diff, <span class="sc">-</span>DIAGNOSIS, <span class="sc">-</span>age_days)</span>
-<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>Encoding is the step most likely to fail silently. Levels are fitted on train and</span>
-<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>applied to test, so an unseen test level becomes <span class="in">`NA`</span> instead of quietly shifting</span>
-<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>every column to its right:</span>
-<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: categorical-encoding</span></span>
-<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (c <span class="cf">in</span> cat_cols) {</span>
-<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>  lev <span class="ot">&lt;-</span> <span class="fu">unique</span>(train_fe[[c]])</span>
-<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -1L because factor() codes from 1, while LightGBM wants categoricals from 0</span></span>
-<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>  train_fe[[c]] <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">factor</span>(train_fe[[c]], <span class="at">levels =</span> lev)) <span class="sc">-</span> <span class="dv">1</span>L</span>
-<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>  test_fe[[c]]  <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">factor</span>(test_fe[[c]],  <span class="at">levels =</span> lev)) <span class="sc">-</span> <span class="dv">1</span>L</span>
-<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">View the code on GitHub</span><span class="co">](https://github.com/tlabagala/icu-mortality-project)</span></span>
-<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a><span class="fu">## Method, and why this one</span></span>
-<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>The project ran in two passes. The first held preprocessing fixed - rare-level</span>
-<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>consolidation, one-hot encoding, then standardisation - and swapped only the model.</span>
-<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>Five families were fitted this way: logistic regression, kNN at k = 25, a random</span>
-<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>forest, a 16-unit single-layer MLP, and XGBoost.</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>**The diagnosis columns were unusable raw.** Free-text <span class="in">`DIAGNOSIS`</span> held about 5,000</span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>unique values and behaved as an ID column, so it was dropped. The 555 ICD-9 codes</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>were rolled into the ~17 standard chapters, and for the boosting pass also</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>multi-hot encoded over the 300 most common codes.</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>**Derived features carried more signal than raw levels:** per-vital ranges, shock</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>index and pulse pressure. A heart rate of 110 means something different at a</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>systolic pressure of 140 than at 80.</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: feature-engineering</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>fe_basic <span class="ot">&lt;-</span> <span class="cf">function</span>(df) {</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>      <span class="at">age_days    =</span> <span class="fu">as.numeric</span>(<span class="fu">difftime</span>(ADMITTIME, DOB, <span class="at">units =</span> <span class="st">"days"</span>)),</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>      <span class="at">AGE         =</span> <span class="fu">pmin</span>(<span class="fu">pmax</span>(age_days <span class="sc">/</span> <span class="fl">365.25</span>, <span class="dv">0</span>), <span class="dv">90</span>),</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>      <span class="at">AGE_OVER_89 =</span> <span class="fu">as.integer</span>(age_days <span class="sc">/</span> <span class="fl">365.25</span> <span class="sc">&gt;</span> <span class="dv">89</span>),</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>      <span class="at">HeartRate_Range =</span> HeartRate_Max <span class="sc">-</span> HeartRate_Min,</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>      <span class="at">SysBP_Range     =</span> SysBP_Max     <span class="sc">-</span> SysBP_Min,</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>      <span class="at">ShockIndex    =</span> HeartRate_Mean <span class="sc">/</span> <span class="fu">na_if</span>(SysBP_Mean, <span class="dv">0</span>),</span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>      <span class="at">PulsePressure =</span> SysBP_Mean <span class="sc">-</span> DiasBP_Mean</span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>DOB, <span class="sc">-</span>ADMITTIME, <span class="sc">-</span>Diff, <span class="sc">-</span>DIAGNOSIS, <span class="sc">-</span>age_days)</span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>Encoding is the step most likely to fail silently. Levels are fitted on train and</span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>applied to test, so an unseen test level becomes <span class="in">`NA`</span> instead of quietly shifting</span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>every column to its right:</span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: categorical-encoding</span></span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (c <span class="cf">in</span> cat_cols) {</span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>  lev <span class="ot">&lt;-</span> <span class="fu">unique</span>(train_fe[[c]])</span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -1L because factor() codes from 1, while LightGBM wants categoricals from 0</span></span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>  train_fe[[c]] <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">factor</span>(train_fe[[c]], <span class="at">levels =</span> lev)) <span class="sc">-</span> <span class="dv">1</span>L</span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>  test_fe[[c]]  <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">factor</span>(test_fe[[c]],  <span class="at">levels =</span> lev)) <span class="sc">-</span> <span class="dv">1</span>L</span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">View the code on GitHub</span><span class="co">](https://github.com/tlabagala/icu-mortality-project)</span></span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a><span class="fu">## Method, and why this one</span></span>
 <span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>The second pass pushed gradient boosting further: richer diagnosis features,</span>
-<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>stratified cross-validation repeated over 3 seeds x 5 folds with early stopping,</span>
-<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>and a 70/30 blend of LightGBM and XGBoost. Repeating the folds matters at an 11%</span>
-<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>positive rate, where a single 5-fold split carries enough noise to move the</span>
-<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>estimated AUC on its own:</span>
-<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: lightgbm-cv</span></span>
-<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (seed <span class="cf">in</span> <span class="fu">c</span>(<span class="dv">42</span>L, <span class="dv">123</span>L, <span class="dv">2024</span>L)) {</span>
-<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>  fold_idx <span class="ot">&lt;-</span> <span class="fu">make_folds</span>(y, N_SPLITS, seed)   <span class="co"># stratified on the outcome</span></span>
-<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a>  seed_oof <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(y))</span>
-<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_along</span>(fold_idx)) {</span>
-<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a>    va <span class="ot">&lt;-</span> fold_idx[[k]]</span>
-<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>    tr <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_along</span>(y), va)</span>
-<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>    dtr <span class="ot">&lt;-</span> <span class="fu">lgb.Dataset</span>(X[tr, ], <span class="at">label =</span> y[tr], <span class="at">categorical_feature =</span> cat_cols)</span>
-<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>    dva <span class="ot">&lt;-</span> <span class="fu">lgb.Dataset</span>(X[va, ], <span class="at">label =</span> y[va], <span class="at">categorical_feature =</span> cat_cols,</span>
-<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>                       <span class="at">reference =</span> dtr)</span>
-<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>    m <span class="ot">&lt;-</span> <span class="fu">lgb.train</span>(<span class="fu">c</span>(lgb_params, <span class="fu">list</span>(<span class="at">seed =</span> seed)), dtr, <span class="at">nrounds =</span> <span class="dv">4000</span>L,</span>
-<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>                   <span class="at">valids =</span> <span class="fu">list</span>(<span class="at">val =</span> dva), <span class="at">early_stopping_rounds =</span> <span class="dv">100</span>L)</span>
-<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>    seed_oof[va] <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, X[va, ])       <span class="co"># each row scored by a model</span></span>
-<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>    test_lgb     <span class="ot">&lt;-</span> test_lgb <span class="sc">+</span> <span class="fu">predict</span>(m, X_test)   <span class="co"># that never saw it</span></span>
-<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>  oof_lgb <span class="ot">&lt;-</span> oof_lgb <span class="sc">+</span> seed_oof</span>
-<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>The blend weight came from the centre of the flat region of the weight sweep</span>
-<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>rather than its peak, since picking the exact top of a noisy curve is a quiet form</span>
-<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>of overfitting the validation set.</span>
-<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>Boosting rather than a linear model because clinical risk is threshold-like - an</span>
-<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>SpO2 below 88 is categorically bad - which trees represent natively. Two boosting</span>
-<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>libraries rather than one because LightGBM grows trees leaf-wise and XGBoost</span>
-<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>level-wise, so their errors are partly decorrelated and the average beats either</span>
-<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a>alone.</span>
-<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; Logistic regression beat the neural network. On tabular data of this size, model</span></span>
-<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; capacity is not free - the extra flexibility has to be paid for in data, and here</span></span>
-<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; it could not be afforded.</span></span>
-<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a><span class="fu">## Findings</span></span>
-<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a><span class="al">![Fig 1. The boosting blend reached 0.942 out-of-fold and logistic regression (0.829) scored above the random forest (~0.81), but these scores come from different evaluations.](../assets/figures/icu-model-comparison.png)</span></span>
-<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a>On the public leaderboard, kNN scored 0.761, the MLP 0.771 and logistic regression</span>
-<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a>0.829. Logistic regression finishing ahead of the neural network suggests mortality</span>
-<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a>risk is broadly additive in these inputs, which is exactly the structure a linear</span>
-<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a>model captures most efficiently. The kNN result is structural rather than a tuning</span>
-<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a>failure: after one-hot encoding, distances concentrate, and a 25-patient</span>
-<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>neighbourhood contains under three deaths on average.</span>
-<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a>The random forest baseline reached ~0.81, but that figure was reported under</span>
-<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a>cross-validation rather than the leaderboard, so its gap to logistic regression is</span>
-<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a>not a clean ranking. The first-pass XGBoost has no reported score, so it is not</span>
-<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a>shown.</span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>The project ran in two passes. The first held preprocessing fixed - rare-level</span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>consolidation, one-hot encoding, then standardisation - and swapped only the model.</span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>Five families were fitted this way: logistic regression, kNN at k = 25, a random</span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>forest, a 16-unit single-layer MLP, and XGBoost.</span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>The second pass pushed gradient boosting further: richer diagnosis features,</span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>stratified cross-validation repeated over 3 seeds x 5 folds with early stopping,</span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>and a 70/30 blend of LightGBM and XGBoost. Repeating the folds matters at an 11%</span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>positive rate, where a single 5-fold split carries enough noise to move the</span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>estimated AUC on its own:</span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: lightgbm-cv</span></span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (seed <span class="cf">in</span> <span class="fu">c</span>(<span class="dv">42</span>L, <span class="dv">123</span>L, <span class="dv">2024</span>L)) {</span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>  fold_idx <span class="ot">&lt;-</span> <span class="fu">make_folds</span>(y, N_SPLITS, seed)   <span class="co"># stratified on the outcome</span></span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>  seed_oof <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(y))</span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_along</span>(fold_idx)) {</span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>    va <span class="ot">&lt;-</span> fold_idx[[k]]</span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>    tr <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_along</span>(y), va)</span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>    dtr <span class="ot">&lt;-</span> <span class="fu">lgb.Dataset</span>(X[tr, ], <span class="at">label =</span> y[tr], <span class="at">categorical_feature =</span> cat_cols)</span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a>    dva <span class="ot">&lt;-</span> <span class="fu">lgb.Dataset</span>(X[va, ], <span class="at">label =</span> y[va], <span class="at">categorical_feature =</span> cat_cols,</span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>                       <span class="at">reference =</span> dtr)</span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>    m <span class="ot">&lt;-</span> <span class="fu">lgb.train</span>(<span class="fu">c</span>(lgb_params, <span class="fu">list</span>(<span class="at">seed =</span> seed)), dtr, <span class="at">nrounds =</span> <span class="dv">4000</span>L,</span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>                   <span class="at">valids =</span> <span class="fu">list</span>(<span class="at">val =</span> dva), <span class="at">early_stopping_rounds =</span> <span class="dv">100</span>L)</span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>    seed_oof[va] <span class="ot">&lt;-</span> <span class="fu">predict</span>(m, X[va, ])       <span class="co"># each row scored by a model</span></span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>    test_lgb     <span class="ot">&lt;-</span> test_lgb <span class="sc">+</span> <span class="fu">predict</span>(m, X_test)   <span class="co"># that never saw it</span></span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>  oof_lgb <span class="ot">&lt;-</span> oof_lgb <span class="sc">+</span> seed_oof</span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>The blend weight came from the centre of the flat region of the weight sweep</span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>rather than its peak, since picking the exact top of a noisy curve is a quiet form</span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>of overfitting the validation set.</span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a>Boosting rather than a linear model because clinical risk is threshold-like - an</span>
+<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a>SpO2 below 88 is categorically bad - which trees represent natively. Two boosting</span>
+<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a>libraries rather than one because LightGBM grows trees leaf-wise and XGBoost</span>
+<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a>level-wise, so their errors are partly decorrelated and the average beats either</span>
+<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a>alone.</span>
+<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; Logistic regression beat the neural network. On tabular data of this size, model</span></span>
+<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; capacity is not free - the extra flexibility has to be paid for in data, and here</span></span>
+<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; it could not be afforded.</span></span>
+<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a><span class="fu">## Findings</span></span>
+<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a><span class="al">![Fig 1. The boosting blend reached 0.942 out-of-fold and logistic regression (0.829) scored above the random forest (~0.81), but these scores come from different evaluations.](../assets/figures/icu-model-comparison.png)</span></span>
+<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>On the public leaderboard, kNN scored 0.761, the MLP 0.771 and logistic regression</span>
+<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a>0.829. Logistic regression finishing ahead of the neural network suggests mortality</span>
+<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a>risk is broadly additive in these inputs, which is exactly the structure a linear</span>
+<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a>model captures most efficiently. The kNN result is structural rather than a tuning</span>
+<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a>failure: after one-hot encoding, distances concentrate, and a 25-patient</span>
+<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a>neighbourhood contains under three deaths on average.</span>
 <span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a>The final blend reached 0.942 out-of-fold. That number is not directly comparable to</span>
-<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a>the leaderboard scores above - it comes from a different evaluation scheme on a</span>
-<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>feature set several hundred columns wider, so much of the gap is features rather</span>
-<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a>than algorithm.</span>
+<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a>The random forest baseline reached ~0.81, but that figure was reported under</span>
+<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a>cross-validation rather than the leaderboard, so its gap to logistic regression is</span>
+<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>not a clean ranking. The first-pass XGBoost has no reported score, so it is not</span>
+<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a>shown.</span>
 <span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a><span class="fu">## What this means in practice</span></span>
-<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a>A model like this would support clinical judgement, not replace it: a hospital</span>
-<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a>could use it to order a review list so the highest-risk new admissions are seen</span>
-<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a>first. Two things would have to change before that. The diagnosis codes would need</span>
-<span id="cb4-178"><a href="#cb4-178" aria-hidden="true" tabindex="-1"></a>replacing with information available at admission (see below), and the</span>
-<span id="cb4-179"><a href="#cb4-179" aria-hidden="true" tabindex="-1"></a>probabilities would need calibrating, because a ward planning staffing needs to</span>
-<span id="cb4-180"><a href="#cb4-180" aria-hidden="true" tabindex="-1"></a>know whether a score of 0.3 really means a 30% risk. The cost of errors is also</span>
-<span id="cb4-181"><a href="#cb4-181" aria-hidden="true" tabindex="-1"></a>lopsided - missing a patient who deteriorates is far worse than reviewing one who</span>
-<span id="cb4-182"><a href="#cb4-182" aria-hidden="true" tabindex="-1"></a>did not - so the alert threshold should be set on that trade-off, not on AUC.</span>
-<span id="cb4-183"><a href="#cb4-183" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-184"><a href="#cb4-184" aria-hidden="true" tabindex="-1"></a><span class="fu">## Assumptions and limitations</span></span>
-<span id="cb4-185"><a href="#cb4-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-186"><a href="#cb4-186" aria-hidden="true" tabindex="-1"></a>**Folds were stratified on the outcome, not grouped by patient.** Splitting happened</span>
-<span id="cb4-187"><a href="#cb4-187" aria-hidden="true" tabindex="-1"></a>at ICU-stay level. If a patient contributes more than one stay, their rows can land</span>
-<span id="cb4-188"><a href="#cb4-188" aria-hidden="true" tabindex="-1"></a>in different folds and the model can effectively memorise them, inflating the</span>
-<span id="cb4-189"><a href="#cb4-189" aria-hidden="true" tabindex="-1"></a>out-of-fold estimate. Patient-level splitting via <span class="in">`group_vfold_cv()`</span> is the fix. I</span>
-<span id="cb4-190"><a href="#cb4-190" aria-hidden="true" tabindex="-1"></a>have not quantified how much repeat admission exists in this extract, so I do not</span>
-<span id="cb4-191"><a href="#cb4-191" aria-hidden="true" tabindex="-1"></a>know the size of the effect.</span>
-<span id="cb4-192"><a href="#cb4-192" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-193"><a href="#cb4-193" aria-hidden="true" tabindex="-1"></a>**Diagnosis codes are not available at hour zero.** ICD-9 codes are assigned over</span>
-<span id="cb4-194"><a href="#cb4-194" aria-hidden="true" tabindex="-1"></a>the stay and finalised at discharge, so using them to predict that stay's outcome</span>
-<span id="cb4-195"><a href="#cb4-195" aria-hidden="true" tabindex="-1"></a>is defensible as a retrospective benchmark but would not transfer to real-time use.</span>
-<span id="cb4-196"><a href="#cb4-196" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-197"><a href="#cb4-197" aria-hidden="true" tabindex="-1"></a>**Logistic regression assumes independent observations and linearity in the</span>
-<span id="cb4-198"><a href="#cb4-198" aria-hidden="true" tabindex="-1"></a>log-odds.** The first is questionable for the same repeat-admission reason; the</span>
-<span id="cb4-199"><a href="#cb4-199" aria-hidden="true" tabindex="-1"></a>second was not formally checked.</span>
-<span id="cb4-200"><a href="#cb4-200" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-201"><a href="#cb4-201" aria-hidden="true" tabindex="-1"></a>**The probabilities are ranked, not calibrated.** Rebalancing the positive class</span>
-<span id="cb4-202"><a href="#cb4-202" aria-hidden="true" tabindex="-1"></a>distorts the output scale and averaging fifteen models compresses it toward the</span>
-<span id="cb4-203"><a href="#cb4-203" aria-hidden="true" tabindex="-1"></a>middle. PR-AUC was computed alongside ROC-AUC, which is the right instinct at an</span>
-<span id="cb4-204"><a href="#cb4-204" aria-hidden="true" tabindex="-1"></a>11% base rate, but no calibration plot was produced.</span>
+<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a>The final blend reached 0.942 out-of-fold. That number is not directly comparable to</span>
+<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a>the leaderboard scores above - it comes from a different evaluation scheme on a</span>
+<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a>feature set several hundred columns wider, so much of the gap is features rather</span>
+<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a>than algorithm.</span>
+<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-178"><a href="#cb4-178" aria-hidden="true" tabindex="-1"></a><span class="fu">## What this means in practice</span></span>
+<span id="cb4-179"><a href="#cb4-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-180"><a href="#cb4-180" aria-hidden="true" tabindex="-1"></a>A model like this would support clinical judgement, not replace it: a hospital</span>
+<span id="cb4-181"><a href="#cb4-181" aria-hidden="true" tabindex="-1"></a>could use it to order a review list so the highest-risk new admissions are seen</span>
+<span id="cb4-182"><a href="#cb4-182" aria-hidden="true" tabindex="-1"></a>first. Two things would have to change before that. The diagnosis codes would need</span>
+<span id="cb4-183"><a href="#cb4-183" aria-hidden="true" tabindex="-1"></a>replacing with information available at admission (see below), and the</span>
+<span id="cb4-184"><a href="#cb4-184" aria-hidden="true" tabindex="-1"></a>probabilities would need calibrating, because a ward planning staffing needs to</span>
+<span id="cb4-185"><a href="#cb4-185" aria-hidden="true" tabindex="-1"></a>know whether a score of 0.3 really means a 30% risk. The cost of errors is also</span>
+<span id="cb4-186"><a href="#cb4-186" aria-hidden="true" tabindex="-1"></a>lopsided - missing a patient who deteriorates is far worse than reviewing one who</span>
+<span id="cb4-187"><a href="#cb4-187" aria-hidden="true" tabindex="-1"></a>did not - so the alert threshold should be set on that trade-off, not on AUC.</span>
+<span id="cb4-188"><a href="#cb4-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-189"><a href="#cb4-189" aria-hidden="true" tabindex="-1"></a><span class="fu">## Assumptions and limitations</span></span>
+<span id="cb4-190"><a href="#cb4-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-191"><a href="#cb4-191" aria-hidden="true" tabindex="-1"></a>**Folds were stratified on the outcome, not grouped by patient.** Splitting happened</span>
+<span id="cb4-192"><a href="#cb4-192" aria-hidden="true" tabindex="-1"></a>at ICU-stay level. If a patient contributes more than one stay, their rows can land</span>
+<span id="cb4-193"><a href="#cb4-193" aria-hidden="true" tabindex="-1"></a>in different folds and the model can effectively memorise them, inflating the</span>
+<span id="cb4-194"><a href="#cb4-194" aria-hidden="true" tabindex="-1"></a>out-of-fold estimate. Patient-level splitting via <span class="in">`group_vfold_cv()`</span> is the fix. I</span>
+<span id="cb4-195"><a href="#cb4-195" aria-hidden="true" tabindex="-1"></a>have not quantified how much repeat admission exists in this extract, so I do not</span>
+<span id="cb4-196"><a href="#cb4-196" aria-hidden="true" tabindex="-1"></a>know the size of the effect.</span>
+<span id="cb4-197"><a href="#cb4-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-198"><a href="#cb4-198" aria-hidden="true" tabindex="-1"></a>**Diagnosis codes are not available at hour zero.** ICD-9 codes are assigned over</span>
+<span id="cb4-199"><a href="#cb4-199" aria-hidden="true" tabindex="-1"></a>the stay and finalised at discharge, so using them to predict that stay's outcome</span>
+<span id="cb4-200"><a href="#cb4-200" aria-hidden="true" tabindex="-1"></a>is defensible as a retrospective benchmark but would not transfer to real-time use.</span>
+<span id="cb4-201"><a href="#cb4-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-202"><a href="#cb4-202" aria-hidden="true" tabindex="-1"></a>**Logistic regression assumes independent observations and linearity in the</span>
+<span id="cb4-203"><a href="#cb4-203" aria-hidden="true" tabindex="-1"></a>log-odds.** The first is questionable for the same repeat-admission reason; the</span>
+<span id="cb4-204"><a href="#cb4-204" aria-hidden="true" tabindex="-1"></a>second was not formally checked.</span>
 <span id="cb4-205"><a href="#cb4-205" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-206"><a href="#cb4-206" aria-hidden="true" tabindex="-1"></a>None of this licenses a claim that any feature causes mortality, or that acting on</span>
-<span id="cb4-207"><a href="#cb4-207" aria-hidden="true" tabindex="-1"></a>the model would change an outcome. It supports one claim only: the ranking is</span>
-<span id="cb4-208"><a href="#cb4-208" aria-hidden="true" tabindex="-1"></a>informative.</span>
+<span id="cb4-206"><a href="#cb4-206" aria-hidden="true" tabindex="-1"></a>**The probabilities are ranked, not calibrated.** Rebalancing the positive class</span>
+<span id="cb4-207"><a href="#cb4-207" aria-hidden="true" tabindex="-1"></a>distorts the output scale and averaging fifteen models compresses it toward the</span>
+<span id="cb4-208"><a href="#cb4-208" aria-hidden="true" tabindex="-1"></a>middle. PR-AUC was computed alongside ROC-AUC, which is the right instinct at an</span>
+<span id="cb4-209"><a href="#cb4-209" aria-hidden="true" tabindex="-1"></a>11% base rate, but no calibration plot was produced.</span>
+<span id="cb4-210"><a href="#cb4-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-211"><a href="#cb4-211" aria-hidden="true" tabindex="-1"></a>None of this licenses a claim that any feature causes mortality, or that acting on</span>
+<span id="cb4-212"><a href="#cb4-212" aria-hidden="true" tabindex="-1"></a>the model would change an outcome. It supports one claim only: the ranking is</span>
+<span id="cb4-213"><a href="#cb4-213" aria-hidden="true" tabindex="-1"></a>informative.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

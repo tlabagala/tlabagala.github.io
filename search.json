@@ -114,49 +114,49 @@
   {
     "objectID": "projects/icu-mortality-prediction.html",
     "href": "projects/icu-mortality-prediction.html",
-    "title": "ICU Mortality Probability Prediction",
+    "title": "Can first-day ICU data flag the patients most at risk?",
     "section": "",
     "text": "Problem: Rank ICU patients by their risk of dying in hospital, using what is known when they arrive, so attention goes to the highest-risk patients first.\nApproach: Five model families compared under one fixed preprocessing recipe, then a LightGBM and XGBoost blend tuned with repeated cross-validation.\nResult: Out-of-fold ROC-AUC of 0.942; the top grade band started at 0.94. Logistic regression beat the neural network.\nSkills: R, tidymodels, LightGBM, XGBoost, feature engineering, cross-validation."
   },
   {
     "objectID": "projects/icu-mortality-prediction.html#the-question",
     "href": "projects/icu-mortality-prediction.html#the-question",
-    "title": "ICU Mortality Probability Prediction",
+    "title": "Can first-day ICU data flag the patients most at risk?",
     "section": "The question",
     "text": "The question\nGiven only what is known about a patient at the moment they arrive in intensive care, how well can we predict whether they will die before discharge? The purpose is triage rather than explanation - ranking patients so that limited clinical attention flows toward the people most likely to need it.\nThe work was a Kaggle competition for a machine learning unit, graded on ROC-AUC on a hidden test set in bands topping out at 0.94. Submissions had to be probabilities, so nothing could be tuned to a threshold, and the leaderboard only showed the score on half the test set - the mark came from the other half."
   },
   {
     "objectID": "projects/icu-mortality-prediction.html#data-and-cleaning",
     "href": "projects/icu-mortality-prediction.html#data-and-cleaning",
-    "title": "ICU Mortality Probability Prediction",
+    "title": "Can first-day ICU data flag the patients most at risk?",
     "section": "Data and cleaning",
     "text": "Data and cleaning\nA preprocessed extract of MIMIC-III, one row per ICU stay: first-day vital signs summarised as min, max and mean, demographics and admission details, plus a separate table of ICD-9 diagnosis codes. The outcome, HOSPITAL_EXPIRE_FLAG, is positive for roughly 11.2% of stays.\nThree parts needed care:\nAge had to be reconstructed. MIMIC shifts the date of birth of any patient over 89 roughly 300 years into the past as a de-identification measure, so a naive ADMITTIME - DOB returns ages in the hundreds. Ages were capped at 90, with an indicator kept, because being old enough to be date-shifted is itself a signal.\nThe diagnosis columns were unusable raw. Free-text DIAGNOSIS held about 5,000 unique values and behaved as an ID column, so it was dropped. The 555 ICD-9 codes were rolled into the ~17 standard chapters, and for the boosting pass also multi-hot encoded over the 300 most common codes.\nDerived features carried more signal than raw levels: per-vital ranges, shock index and pulse pressure. A heart rate of 110 means something different at a systolic pressure of 140 than at 80.\n\n\nCode\nfe_basic &lt;- function(df) {\n  df |&gt;\n    mutate(\n      age_days    = as.numeric(difftime(ADMITTIME, DOB, units = \"days\")),\n      AGE         = pmin(pmax(age_days / 365.25, 0), 90),\n      AGE_OVER_89 = as.integer(age_days / 365.25 &gt; 89),\n\n      HeartRate_Range = HeartRate_Max - HeartRate_Min,\n      SysBP_Range     = SysBP_Max     - SysBP_Min,\n\n      ShockIndex    = HeartRate_Mean / na_if(SysBP_Mean, 0),\n      PulsePressure = SysBP_Mean - DiasBP_Mean\n    ) |&gt;\n    select(-DOB, -ADMITTIME, -Diff, -DIAGNOSIS, -age_days)\n}\n\n\nEncoding is the step most likely to fail silently. Levels are fitted on train and applied to test, so an unseen test level becomes NA instead of quietly shifting every column to its right:\n\n\nCode\nfor (c in cat_cols) {\n  lev &lt;- unique(train_fe[[c]])\n  # -1L because factor() codes from 1, while LightGBM wants categoricals from 0\n  train_fe[[c]] &lt;- as.integer(factor(train_fe[[c]], levels = lev)) - 1L\n  test_fe[[c]]  &lt;- as.integer(factor(test_fe[[c]],  levels = lev)) - 1L\n}\n\n\nView the code on GitHub"
   },
   {
     "objectID": "projects/icu-mortality-prediction.html#method-and-why-this-one",
     "href": "projects/icu-mortality-prediction.html#method-and-why-this-one",
-    "title": "ICU Mortality Probability Prediction",
+    "title": "Can first-day ICU data flag the patients most at risk?",
     "section": "Method, and why this one",
     "text": "Method, and why this one\nThe project ran in two passes. The first held preprocessing fixed - rare-level consolidation, one-hot encoding, then standardisation - and swapped only the model. Five families were fitted this way: logistic regression, kNN at k = 25, a random forest, a 16-unit single-layer MLP, and XGBoost.\nThe second pass pushed gradient boosting further: richer diagnosis features, stratified cross-validation repeated over 3 seeds x 5 folds with early stopping, and a 70/30 blend of LightGBM and XGBoost. Repeating the folds matters at an 11% positive rate, where a single 5-fold split carries enough noise to move the estimated AUC on its own:\n\n\nCode\nfor (seed in c(42L, 123L, 2024L)) {\n  fold_idx &lt;- make_folds(y, N_SPLITS, seed)   # stratified on the outcome\n  seed_oof &lt;- rep(0, length(y))\n\n  for (k in seq_along(fold_idx)) {\n    va &lt;- fold_idx[[k]]\n    tr &lt;- setdiff(seq_along(y), va)\n\n    dtr &lt;- lgb.Dataset(X[tr, ], label = y[tr], categorical_feature = cat_cols)\n    dva &lt;- lgb.Dataset(X[va, ], label = y[va], categorical_feature = cat_cols,\n                       reference = dtr)\n\n    m &lt;- lgb.train(c(lgb_params, list(seed = seed)), dtr, nrounds = 4000L,\n                   valids = list(val = dva), early_stopping_rounds = 100L)\n\n    seed_oof[va] &lt;- predict(m, X[va, ])       # each row scored by a model\n    test_lgb     &lt;- test_lgb + predict(m, X_test)   # that never saw it\n  }\n  oof_lgb &lt;- oof_lgb + seed_oof\n}\n\n\nThe blend weight came from the centre of the flat region of the weight sweep rather than its peak, since picking the exact top of a noisy curve is a quiet form of overfitting the validation set.\nBoosting rather than a linear model because clinical risk is threshold-like - an SpO2 below 88 is categorically bad - which trees represent natively. Two boosting libraries rather than one because LightGBM grows trees leaf-wise and XGBoost level-wise, so their errors are partly decorrelated and the average beats either alone.\n\nLogistic regression beat the neural network. On tabular data of this size, model capacity is not free - the extra flexibility has to be paid for in data, and here it could not be afforded."
   },
   {
     "objectID": "projects/icu-mortality-prediction.html#findings",
     "href": "projects/icu-mortality-prediction.html#findings",
-    "title": "ICU Mortality Probability Prediction",
+    "title": "Can first-day ICU data flag the patients most at risk?",
     "section": "Findings",
     "text": "Findings\n\n\n\nFig 1. The boosting blend reached 0.942 out-of-fold and logistic regression (0.829) scored above the random forest (~0.81), but these scores come from different evaluations.\n\n\nOn the public leaderboard, kNN scored 0.761, the MLP 0.771 and logistic regression 0.829. Logistic regression finishing ahead of the neural network suggests mortality risk is broadly additive in these inputs, which is exactly the structure a linear model captures most efficiently. The kNN result is structural rather than a tuning failure: after one-hot encoding, distances concentrate, and a 25-patient neighbourhood contains under three deaths on average.\nThe random forest baseline reached ~0.81, but that figure was reported under cross-validation rather than the leaderboard, so its gap to logistic regression is not a clean ranking. The first-pass XGBoost has no reported score, so it is not shown.\nThe final blend reached 0.942 out-of-fold. That number is not directly comparable to the leaderboard scores above - it comes from a different evaluation scheme on a feature set several hundred columns wider, so much of the gap is features rather than algorithm."
   },
   {
     "objectID": "projects/icu-mortality-prediction.html#what-this-means-in-practice",
     "href": "projects/icu-mortality-prediction.html#what-this-means-in-practice",
-    "title": "ICU Mortality Probability Prediction",
+    "title": "Can first-day ICU data flag the patients most at risk?",
     "section": "What this means in practice",
     "text": "What this means in practice\nA model like this would support clinical judgement, not replace it: a hospital could use it to order a review list so the highest-risk new admissions are seen first. Two things would have to change before that. The diagnosis codes would need replacing with information available at admission (see below), and the probabilities would need calibrating, because a ward planning staffing needs to know whether a score of 0.3 really means a 30% risk. The cost of errors is also lopsided - missing a patient who deteriorates is far worse than reviewing one who did not - so the alert threshold should be set on that trade-off, not on AUC."
   },
   {
     "objectID": "projects/icu-mortality-prediction.html#assumptions-and-limitations",
     "href": "projects/icu-mortality-prediction.html#assumptions-and-limitations",
-    "title": "ICU Mortality Probability Prediction",
+    "title": "Can first-day ICU data flag the patients most at risk?",
     "section": "Assumptions and limitations",
     "text": "Assumptions and limitations\nFolds were stratified on the outcome, not grouped by patient. Splitting happened at ICU-stay level. If a patient contributes more than one stay, their rows can land in different folds and the model can effectively memorise them, inflating the out-of-fold estimate. Patient-level splitting via group_vfold_cv() is the fix. I have not quantified how much repeat admission exists in this extract, so I do not know the size of the effect.\nDiagnosis codes are not available at hour zero. ICD-9 codes are assigned over the stay and finalised at discharge, so using them to predict that stay’s outcome is defensible as a retrospective benchmark but would not transfer to real-time use.\nLogistic regression assumes independent observations and linearity in the log-odds. The first is questionable for the same repeat-admission reason; the second was not formally checked.\nThe probabilities are ranked, not calibrated. Rebalancing the positive class distorts the output scale and averaging fifteen models compresses it toward the middle. PR-AUC was computed alongside ROC-AUC, which is the right instinct at an 11% base rate, but no calibration plot was produced.\nNone of this licenses a claim that any feature causes mortality, or that acting on the model would change an outcome. It supports one claim only: the ranking is informative."
   },
@@ -165,28 +165,49 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "Hi there! My name is Tristan Labagala and I am a final year Bachelor of Commerce (Business Analytics)/Bachelor of Information Systems (Business Information Technology) student at Monash University. I am passionate about utilising data to uncover insights and solve real problems."
+    "text": "I’m Tristan Labagala, a Monash University Commerce and IT student majoring in Business Analytics and Business Information Systems, graduating in November 2026. The problems I like most start with messy data and end with a decision someone has to make. As a finance intern at JBS Pork Australia, that meant reconciling freight costs across the SAP and CSB ERP systems and building Excel dashboards that compared forecasts and budgets with actuals. At the Monash Statistical Analytics Club I lead a team of student analysts, which won Best Team at the inaugural Data Analytics Initiative Pitch Night in October 2026."
+  },
+  {
+    "objectID": "about.html#experience",
+    "href": "about.html#experience",
+    "title": "About",
+    "section": "Experience",
+    "text": "Experience\n\n\nJul 2026 - Oct 2026\nData Analytics Initiative Team Lead · Monash Statistical Analytics Club (MSAC)\nLeading student analysts; the team won Best Team at the inaugural MSAC DAI Pitch Night (Oct 2026).\n\n\nJun - Jul 2026\nFinance Intern · JBS Pork Australia\nFreight cost reconciliation across the SAP and CSB ERP systems; Excel dashboards for forecast vs actual and actual vs budget.\n\n\nNov 2025 - Oct 2026\nSponsorship Officer · Computing and Commerce Association (CCA)\nSecured a record 12+ sponsors for 2026.\n\n\nFeb 2025 - present\nReferee Supervisor · Westgate Basketball Association\n\n\nSep 2023 - present\nControl Room Operator · Melbourne Park\n\n\nNov 2022 - Aug 2025\nBasketball Coach · Westgate Imperials"
+  },
+  {
+    "objectID": "about.html#education",
+    "href": "about.html#education",
+    "title": "About",
+    "section": "Education",
+    "text": "Education\n\n\nGraduating Nov 2026\nBachelor of Commerce / Bachelor of Information Technology · Monash University\nMajoring in Business Analytics and Business Information Systems.\n\n\nStudy tour\nData Science and AI study tour · HEC Montréal\nHigh Distinction."
   },
   {
     "objectID": "about.html#tools",
     "href": "about.html#tools",
     "title": "About",
     "section": "Tools",
-    "text": "Tools\nLinked items open the matching projects in my portfolio.\n\nLanguages: R · Python · SQL\nMethods: Machine learning · Econometrics · Forecasting · Text analytics · Simulation · Data visualisation\nWorkflow: Excel · Quarto · Git · VS Code"
+    "text": "Tools\nLinked items open the matching projects in my portfolio.\n\n\nLanguages\n\nR (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL\n\nMethods\n\nMachine learning · Econometrics · Forecasting · Text analytics · Simulation · Data visualisation\n\nBI\n\nPower BI · Excel\n\nWorkflow\n\nGit · Quarto · VS Code"
   },
   {
-    "objectID": "about.html#elsewhere",
-    "href": "about.html#elsewhere",
+    "objectID": "about.html#contact",
+    "href": "about.html#contact",
     "title": "About",
-    "section": "Elsewhere",
-    "text": "Elsewhere\n\nEmail\nGitHub\nLinkedIn"
+    "section": "Contact",
+    "text": "Contact\nEmail me at tristan.labagala@gmail.com, or find me on LinkedIn and GitHub.\n\n LinkedIn  Email  GitHub"
   },
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "My Portfolio",
+    "title": "Tristan Labagala",
     "section": "",
-    "text": "This portfolio pulls together analytics and research work from university coursework, personal projects, and student club work. Every write-up follows the same structure - the question I was trying to answer, the data behind it, the method I chose and why it fit the problem (not just how it works), what I found, and the assumptions the analysis rests on. Each write-up links to its full code on GitHub or its full paper, so you can see how the results were produced.\n\n\n\n\n\n\n\n\n\n\nCan a two-year forecast keep up with WA food spending?\n\n\n\nR\n\nForecasting\n\nRetail\n\n\n\nARIMA and ETS models for 40 years of monthly WA specialised food retail turnover, checked against two years of later ABS data.\n\n\n\nNov 11, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan a smarter strategy beat drafting off last season’s totals?\n\n\n\nPython\n\nForecasting\n\nSimulation\n\nSport\n\n\n\nA fantasy NBA draft assistant in Python - player projections, a lineup-aware draft engine and a leakage-free backtest over 13 seasons.\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nICU Mortality Probability Prediction\n\n\n\nR\n\nMachine learning\n\nHealth\n\n\n\nFive model families benchmarked against a gradient boosting ensemble on MIMIC-III ICU admissions, built for a Kaggle competition.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhat predicts crime across Victoria’s LGAs?\n\n\n\nR\n\nEconometrics\n\nMachine learning\n\nPublic policy\n\n\n\nPanel econometrics on 78 Victorian LGAs, 2011-2024: fixed effects, LASSO and elastic net, as part of a three-person MSAC research team.\n\n\n\nMay 1, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan word frequencies alone tell sport from politics?\n\n\n\nR\n\nText analytics\n\nMachine learning\n\nMedia\n\n\n\nClustering and network analysis on a hand-built corpus of 20 news articles, in R with tm and igraph.\n\n\n\nMay 29, 2025\n\n\n\n\n\n\nNo matching items"
+    "text": "Bachelor of Commerce / Bachelor of IT · Monash University · Melbourne\nI turn messy business data into decisions people can act on - from reconciling freight costs across two ERP systems as a finance intern at JBS, to leading student analytics teams at the Monash Statistical Analytics Club. Each project below starts with a question and ends with what the answer means in practice.\n\n LinkedIn  Email  GitHub"
+  },
+  {
+    "objectID": "index.html#projects",
+    "href": "index.html#projects",
+    "title": "Tristan Labagala",
+    "section": "Projects",
+    "text": "Projects\n\n\n\n\n\n\n\n\n\n\nCan a two-year forecast keep up with WA food spending?\n\n\n\nR\n\nForecasting\n\nRetail\n\n\n\nARIMA and ETS models for 40 years of monthly WA specialised food retail turnover, checked against two years of later ABS data.\n\n\n\nNov 11, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan a smarter strategy beat drafting off last season’s totals?\n\n\n\nPython\n\nForecasting\n\nSimulation\n\nSport\n\n\n\n+14.6% starting-lineup points over the naive draft, winning all 13 held-out seasons. Python projection model, lineup-aware draft engine and leakage-free backtest.\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan first-day ICU data flag the patients most at risk?\n\n\n\nR\n\nMachine learning\n\nHealth\n\n\n\nOut-of-fold ROC-AUC of 0.942 ranking ICU mortality risk. Five model families benchmarked, then a LightGBM + XGBoost blend in R.\n\n\n\nMay 24, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nWhat predicts crime across Victoria’s LGAs?\n\n\n\nR\n\nEconometrics\n\nMachine learning\n\nPublic policy\n\n\n\nElastic net predicted best (test R² 0.777) across 78 Victorian LGAs, 2011-2024; fixed effects showed which drivers hold within an area.\n\n\n\nMay 1, 2026\n\n\n\n\n\n\n\n\n\n\n\n\n\nCan word frequencies alone tell sport from politics?\n\n\n\nR\n\nText analytics\n\nMachine learning\n\nMedia\n\n\n\n60% of genre labels recovered from word frequencies alone (vs 33% chance), and why one preprocessing setting capped it.\n\n\n\nMay 29, 2025\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "projects/nba-fantasy-draft.html",
