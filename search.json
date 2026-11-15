@@ -165,14 +165,14 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "I’m Tristan Labagala, a Monash University Commerce and IT student majoring in Business Analytics and Business Information Systems, graduating in November 2026. The problems I like most start with messy data and end with a decision someone has to make. As a finance intern at JBS Pork Australia, that meant reconciling freight costs across the SAP and CSB ERP systems and building Excel dashboards that compared forecasts and budgets with actuals. At the Monash Statistical Analytics Club I lead a team of student analysts, which won Best Team at the inaugural Data Analytics Initiative Pitch Night in October 2026."
+    "text": "I’m Tristan Labagala, a Monash University Commerce and IT student majoring in Business Analytics and Business Information Systems, graduating in November 2026. The problems I like most start with messy data and end with a decision someone has to make.\nOutside of work, I enjoy playing and refereeing basketball. I am currently undertaking my Level 1 accreditation, with hopes to referee on the Victorian Junior Basketball League (VJBL) panel in 2027, which is the highest junior state league in Victoria."
   },
   {
     "objectID": "about.html#experience",
     "href": "about.html#experience",
     "title": "About",
     "section": "Experience",
-    "text": "Experience\n\n\nJul 2026 - Oct 2026\nData Analytics Initiative Team Lead · Monash Statistical Analytics Club (MSAC)\nLeading student analysts; the team won Best Team at the inaugural MSAC DAI Pitch Night (Oct 2026).\n\n\nJun - Jul 2026\nFinance Intern · JBS Pork Australia\nFreight cost reconciliation across the SAP and CSB ERP systems; Excel dashboards for forecast vs actual and actual vs budget.\n\n\nNov 2025 - Oct 2026\nSponsorship Officer · Computing and Commerce Association (CCA)\nSecured a record 12+ sponsors for 2026.\n\n\nFeb 2025 - present\nReferee Supervisor · Westgate Basketball Association\n\n\nSep 2023 - present\nControl Room Operator · Melbourne Park\n\n\nNov 2022 - Aug 2025\nBasketball Coach · Westgate Imperials"
+    "text": "Experience\n\n\nJul - Oct 2026\nData Analytics Initiative Team Lead · Monash Statistical Analytics Club (MSAC)\nLed a team of four student analysts measuring how far cyclones move banana prices and how long the effects persist; won Best Team at the inaugural MSAC DAI Pitch Night (Oct 2026).\n\n\nJun - Jul 2026\nFinance Intern · JBS Pork Australia\nReconciled freight costs across the SAP and CSB ERP systems, and built Excel dashboards for the finance and logistics teams comparing forecast with actual and actual with budget.\n\n\nNov 2025 - Oct 2026\nSponsorship Officer · Computing and Commerce Association (CCA)\nSecured a record 12+ sponsors for 2026.\n\n\nAlongside study\n\nReferee Supervisor · Westgate Basketball Association Feb 2025 - present\nControl Room Operator · Melbourne Park Sep 2023 - present\nBasketball Coach · Westgate Imperials Nov 2022 - Aug 2025"
   },
   {
     "objectID": "about.html#education",
@@ -186,7 +186,7 @@
     "href": "about.html#tools",
     "title": "About",
     "section": "Tools",
-    "text": "Tools\nLinked items open the matching projects in my portfolio.\n\n\nLanguages\n\nR (tidyverse, ggplot2, fixest, lme4, mgcv) · Python (scikit-learn, LightGBM, matplotlib) · SQL\n\nMethods\n\nMachine learning · Econometrics · Forecasting · Text analytics · Simulation · Data visualisation\n\nBI\n\nPower BI · Excel\n\nWorkflow\n\nGit · Quarto · VS Code"
+    "text": "Tools\nLinked items open the matching projects in my portfolio.\n\n\nLanguages\n\nR · Python · SQL\n\nMethods\n\nMachine learning · Econometrics · Forecasting · Text analytics · Simulation · Data visualisation\n\nBI\n\nPower BI · Excel\n\nWorkflow\n\nGit · Quarto · VS Code"
   },
   {
     "objectID": "about.html#contact",
