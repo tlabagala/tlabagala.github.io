@@ -11,7 +11,7 @@ I'm Tristan Labagala, a Monash University Commerce and IT student majoring in Bu
 
 ::: {.timeline}
 ::: {.tl-item}
-[Jul 2026 - present]{.tl-date}
+[Jul 2026 - Oct 2026]{.tl-date}
 
 **Data Analytics Initiative Team Lead** · Monash Statistical Analytics Club (MSAC)\
 Leading student analysts; the team won Best Team at the inaugural MSAC DAI Pitch Night (Oct 2026).
@@ -25,7 +25,7 @@ Freight cost reconciliation across the SAP and CSB ERP systems; Excel dashboards
 :::
 
 ::: {.tl-item}
-[Nov 2025 - present]{.tl-date}
+[Nov 2025 - Oct 2026]{.tl-date}
 
 **Sponsorship Officer** · Computing and Commerce Association (CCA)\
 Secured a record 12+ sponsors for 2026.
