@@ -141,3 +141,10 @@ canvas() |>
   mini_bars(c(33, 60), highlight = 2, labels = c("Chance", "Clustering"),
             value_fmt = function(x) paste0(x, "%")) |>
   save_thumb("text-mining-news-genres")
+
+# WA retail: 2023-24 MAPE against later ABS data, lower is better.
+canvas() |>
+  headline("2.7%", "average error forecasting\nWA food retail, 2023-24") |>
+  mini_bars(c(4.7, 2.7), highlight = 2, labels = c("ARIMA", "ETS"),
+            value_fmt = function(x) paste0(x, "%")) |>
+  save_thumb("wa-retail-forecasting")

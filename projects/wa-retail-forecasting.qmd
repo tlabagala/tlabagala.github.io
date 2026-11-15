@@ -3,8 +3,13 @@ title: "Can a two-year forecast keep up with WA food spending?"
 description: "ARIMA and ETS models for 40 years of monthly WA specialised food retail turnover, checked against two years of later ABS data."
 date: 2026-11-11
 categories: [R, Forecasting, Retail]
-image: "../assets/figures/wa-retail-series.png"
-image-alt: "Line chart of monthly WA specialised food retail turnover from 1982 to 2022, rising from about 13 to over 120 million dollars in a series of steps."
+image: "thumbs/wa-retail-forecasting.png"
+image-alt: "2.7 per cent average forecast error on 2023-24 WA food retail turnover for ETS, beside 4.7 per cent for ARIMA."
+# Link previews keep the full in-page figure; the card uses the thumbnail.
+open-graph:
+  image: "../assets/figures/wa-retail-series.png"
+twitter-card:
+  image: "../assets/figures/wa-retail-series.png"
 resources:
   - "../assets/reports/wa-retail-forecasting-report.html"
 ---
